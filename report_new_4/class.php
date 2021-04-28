@@ -1671,7 +1671,7 @@ class Report extends CBitrixComponent
         $res = CTasks::GetList(
             array("TITLE" => "ASC"),
             $t_arFilter,
-            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID','UF_AUTO_218498756460')
+            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID','UF_AUTO_779960634145')
         );
 
         while ($arTask = $res->GetNext()) {
@@ -1845,7 +1845,7 @@ class Report extends CBitrixComponent
         echo "<script> console.log(\"params\")</script>";
         echo "<script> console.log({$varvarDUMP})</script>";*/
 
-        // Выбираем все задачи пользователя с ID = 22
+        // Выбираем задачи
         if (!CModule::IncludeModule("tasks")) return;
 
         if (is_null($params['dateTo'])) {
@@ -1862,7 +1862,7 @@ class Report extends CBitrixComponent
         $res = CTasks::GetList(
             array("TITLE" => "ASC"),
             $t_arFilter,
-            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID','UF_AUTO_218498756460')
+            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID','UF_AUTO_779960634145')
         );
 
         while ($arTask = $res->GetNext()) {
@@ -1874,7 +1874,7 @@ class Report extends CBitrixComponent
                     $tdItem = explode('[/TD]', $trItem);  //// разбиваем <tr> на <td>
             }
             $arTask['SUMMA_SDELKI_BEZ_NDS'] = str_replace('[TD]', '', trim($tdItem[1], '|RUB')) * 1; */
-            $arTask['SUMMA_SDELKI_BEZ_NDS'] = $arTask['UF_AUTO_218498756460'];
+            $arTask['SUMMA_SDELKI_BEZ_NDS'] = $arTask['UF_AUTO_779960634145'];
             foreach ($arTask['UF_CRM_TASK'] as $crm) {
                 if (strrpos($crm, 'D_') === 0) {
                     $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
