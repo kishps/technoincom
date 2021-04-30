@@ -7,13 +7,22 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 <script src="/bitrix/js/main/amcharts/4.8.5//themes/material.js"></script>
 <script src="/bitrix/js/main/amcharts/4.8.5//themes/frozen.js"></script>
 <style>
-.pushthebutton {
-    border: 2px solid #46db01 !important;
-}
+    .pushthebutton {
+        border: 2px solid #46db01 !important;
+    }
 </style>
 <!-- Resources -->
-
-<h1 class="report-title"></h1>
+<div>
+    <h1 class="report-title"></h1>
+    <div class="js-allreport">
+        <svg  viewBox="0 0 100 80" width="40" height="40">
+            <rect width="100" height="15" rx="0"></rect>
+            <rect y="30" width="100" height="15" rx="0"></rect>
+            <rect y="60" width="100" height="15" rx="0"></rect>
+        </svg>
+    </div>
+    <div style="clear: both;"></div>
+</div>
 <section id="report_block">
     <article class="report">
         <div id="plans"></div>
@@ -22,11 +31,6 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
         <span class="cls_btn"></span>
         <h2>Настройки</h2>
         <div class="time-type">
-            <?/*<select name="time-type">
-                <option value="mounth">Месяц</option>
-                <option value="quarter">Квартал</option>
-                <option value="year">Год</option>
-            </select>*/?>
             <div class="form_radio_group">
                 <div class="form_radio_group-item">
                     <input id="radio-1" type="radio" name="time-type" value="mounth" checked>
@@ -70,7 +74,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             </select>
         </div>
         <div class="submit-button">
-            <button id="submit-button">Применить</button>
+            <button id="submit-button">Показать</button>
         </div>
         <div class="users">
             <form id="form-user-settings">
@@ -115,6 +119,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
         $('#plans').html('');
         arrFact = PlanFactAnalyz.fact.DATA.PLAN;
         for (element in arrFact) {
+            arrFact[element].printed = true;
             //console.log(element);
             if (element !== 'ALL') {
                 $('#plans').append(`<div class="user-card" data-id="${arrFact[element].ID}">
@@ -123,14 +128,14 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 											<div class="user-plan-name">
 												${arrFact[element].NAME}
 											</div>
-											<div data-id="${arrFact[element].ID}" class="chart-plan"><div class="progress-label"></div><div class="plan-label"></div></div>
+											<div data-id="${arrFact[element].ID}" class="chart-plan"><div class="total-fact-label"></div><div class="progress-label"></div><div class="plan-label"></div></div>
 									</div>
 
                                     <div data-id="${arrFact[element].ID}" class="open-click"></div>
                                     <div class="summ">
                                         <div class="total-summ"><div>Всего продаж</div><div></div>${(arrFact[element].TOTAL)?new Intl.NumberFormat().format(arrFact[element].TOTAL):''}</div>
-                                        <div class="total-plan"><div>План на месяц</div><div></div>${(PlanFactAnalyz.settings.current)?((PlanFactAnalyz.settings.current[element].PLAN_USER)?new Intl.NumberFormat().format(PlanFactAnalyz.settings.current[element].PLAN_USER):''):''}</div>
-                                        <div class="total-ostatok"><div>Осталось</div><div></div>${(PlanFactAnalyz.settings.current && arrFact[element].TOTAL && PlanFactAnalyz.settings.current[element].PLAN_USER)?(new Intl.NumberFormat().format(PlanFactAnalyz.settings.current[element].PLAN_USER-arrFact[element].TOTAL)):''}</div>
+                                        <div class="total-plan"><div>План на <span class="time-title">месяц<span></div><div></div>${(PlanFactAnalyz.settings.current)?((PlanFactAnalyz.settings.current[element])?new Intl.NumberFormat().format(PlanFactAnalyz.settings.current[element].PLAN_USER):''):''}</div>
+                                        <div class="total-ostatok"><div>Осталось</div><div></div>${(PlanFactAnalyz.settings.current && arrFact[element].TOTAL && PlanFactAnalyz.settings.current[element])?(new Intl.NumberFormat().format(PlanFactAnalyz.settings.current[element].PLAN_USER-arrFact[element].TOTAL)):''}</div>
                                         <div class="total-count"><div>Количество отгрузок</div><div></div>${(arrFact[element].TASKS)?(Object.keys(arrFact[element].TASKS).length):''}</div>
                                     </div>
                                     <div class="table">
@@ -161,8 +166,10 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 										</div>
 										<div>
                                        <div id="${arrFact[element].ID}-chart-category" class="chart-groups"></div>
-										<div class="chart-title">Категории сделок</div>
-										</div>
+										<div class="chart-title">
+                                                ${(PlanFactAnalyz.fact.DATA.REPORT_TOTALS && PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element] && PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_SUPPORT_TOTAL)?`<span>Всего продаж сопровождения<span><br>${new Intl.NumberFormat().format(PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_SUPPORT_TOTAL)} ₽`:'Категории сделок' }
+                                        </div>
+									   </div>
 									</div>
                                 </div>`);
                 for (task in arrFact[element].TASKS) {
@@ -189,12 +196,14 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                 if (PlanFactAnalyz.settings.current && PlanFactAnalyz.settings.current[element] && PlanFactAnalyz.settings.current[element].PLAN_USER) {
                     let progressVal = parseInt((arrFact[element].TOTAL / PlanFactAnalyz.settings.current[element].PLAN_USER) * 100);
                     //console.log(progressVal);
+                    let totalFactLabel = $(`.chart-plan[data-id="${element}"] .total-fact-label`);
                     let progressLabel = $(`.chart-plan[data-id="${element}"] .progress-label`);
                     let planLabel = $(`.chart-plan[data-id="${element}"] .plan-label`);
                     $(`.chart-plan[data-id="${element}"]`).progressbar({
                         value: progressVal
                     });
                     progressLabel.text(progressVal + "%");
+                    totalFactLabel.text((arrFact[element] && arrFact[element].TOTAL) ? new Intl.NumberFormat().format(arrFact[element].TOTAL) + " ₽" : '');
                     planLabel.text((PlanFactAnalyz.settings.current && PlanFactAnalyz.settings.current[element].PLAN_USER) ? new Intl.NumberFormat().format(PlanFactAnalyz.settings.current[element].PLAN_USER) + " ₽" : '');
 
                 }
@@ -218,7 +227,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                 let dataDealCategory = [{
                     "Категория сделки": "Сопровождение",
                     "руб.": (PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_SUPPORT_TOTAL) ? PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_SUPPORT_TOTAL : '',
-                     "color": am4core.color("#ff6347")
+                    "color": am4core.color("#ff6347")
                 }, {
                     "Категория сделки": "Собственная",
                     "руб.": (PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_OWN_TOTAL) ? PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_OWN_TOTAL : '',
@@ -234,7 +243,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                                     <div class="user-plan-name">
                                         Компания
                                     </div>
-                                    <div data-id="0" class="chart-plan"><div class="progress-label"></div><div class="plan-label"></div></div>
+                                    <div data-id="0" class="chart-plan"><div class="total-fact-label"></div><div class="progress-label"></div><div class="plan-label"></div></div>
 									</div>
 									 <div data-id="0" class="open-click"></div>
 									<div class="0-totals">
@@ -245,6 +254,10 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 										<div class="total-group">
                                             <div class="groupname">Количество отгрузок</div>
                                             <div class="groupsumm  total-company">${arrFact[element].TOTAL_TASKS}</div>
+                                         </div>
+                                         <div class="total-group">
+                                            <div class="groupname">ИТОГО собственные + сопровождение</div>
+                                            <div class="groupsumm  total-company">${(PlanFactAnalyz.fact && PlanFactAnalyz.fact.DATA && PlanFactAnalyz.fact.DATA.REPORT_TOTALS &&PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element] && PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_TOTAL)?new Intl.NumberFormat().format(PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_TOTAL)+" ₽":''}</div>
                                          </div>
                                     </div>		
 									<div>
@@ -265,7 +278,8 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                                          </div>`)
                 }
 
-                if (PlanFactAnalyz.settings.current[0] && PlanFactAnalyz.settings.current[0].PLAN_USER) {
+                if (PlanFactAnalyz.settings.current && PlanFactAnalyz.settings.current[0] && PlanFactAnalyz.settings.current[0].PLAN_USER && PlanFactAnalyz.settings.current[0].PLAN_USER > 0) {
+                    let totalFactLabel = $(`.chart-plan[data-id="0"] .total-fact-label`);
                     let progressVal = parseInt((arrFact[element].TOTAL / PlanFactAnalyz.settings.current[0].PLAN_USER) * 100);
                     //console.log(progressVal);
                     let progressLabel = $(`.chart-plan[data-id="0"] .progress-label`);
@@ -274,6 +288,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                         value: progressVal
                     });
                     progressLabel.text(progressVal + "%");
+                    totalFactLabel.text((arrFact[element] && arrFact[element].TOTAL) ? new Intl.NumberFormat().format(arrFact[element].TOTAL) + " ₽" : '');
                     planLabel.text(new Intl.NumberFormat().format(PlanFactAnalyz.settings.current[0].PLAN_USER) + " ₽");
 
                 }
@@ -289,7 +304,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                 let dataDealCategory = [{
                     "Категория сделки": "Сопровождение",
                     "руб.": (PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_SUPPORT_TOTAL) ? PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_SUPPORT_TOTAL : '',
-                     "color": am4core.color("#ff6347")
+                    "color": am4core.color("#ff6347")
                 }, {
                     "Категория сделки": "Собственная",
                     "руб.": (PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_OWN_TOTAL) ? PlanFactAnalyz.fact.DATA.REPORT_TOTALS[element].DEALS_OWN_TOTAL : '',
@@ -300,6 +315,48 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             }
         }
         bindClickActionAcordeon();
+    }
+
+    function makeOtherKards() {
+        let arrCurrPlan = PlanFactAnalyz.settings.current;
+        for (let planItem in arrCurrPlan) {
+            if (PlanFactAnalyz.fact && PlanFactAnalyz.fact.DATA && PlanFactAnalyz.fact.DATA.PLAN && PlanFactAnalyz.fact.DATA.PLAN[planItem] && PlanFactAnalyz.fact.DATA.PLAN[planItem].printed) continue;
+            if (planItem == 0 || planItem === 0) continue;
+
+            let cardPlanItem = `<div class="user-card" data-id="${planItem}">
+                                    <div class="user-plan">
+                                        <div class="photo-img"><img src="${PlanFactAnalyz.fact.USERS[planItem].PHOTO.src}" alt="${PlanFactAnalyz.fact.USERS[planItem].NAME}"></div>
+                                        <div class="user-plan-name">
+                                            ${PlanFactAnalyz.fact.USERS[planItem].NAME} ${PlanFactAnalyz.fact.USERS[planItem].LAST_NAME}
+                                        </div>
+                                        <div data-id="${planItem}" class="chart-plan"><div class="progress-label"></div><div class="plan-label"></div>
+                                        </div>
+                                    </div>
+                                </div>
+            `;
+
+            if ($('.user-card.company').length > 0) {
+                $('.user-card.company').before(cardPlanItem);
+                console.log('before');
+            } else {
+                $('#plans').prepend(cardPlanItem);
+                console.log('prepend');
+            }
+
+            if (PlanFactAnalyz.settings.current && PlanFactAnalyz.settings.current[planItem] && PlanFactAnalyz.settings.current[planItem].PLAN_USER) {
+                let progressVal = 0;
+                //console.log(progressVal);
+                let progressLabel = $(`.chart-plan[data-id="${planItem}"] .progress-label`);
+                let planLabel = $(`.chart-plan[data-id="${planItem}"] .plan-label`);
+                $(`.chart-plan[data-id="${planItem}"]`).progressbar({
+                    value: progressVal
+                });
+                progressLabel.text(progressVal + "%");
+                planLabel.text((PlanFactAnalyz.settings.current && PlanFactAnalyz.settings.current[planItem].PLAN_USER) ? new Intl.NumberFormat().format(PlanFactAnalyz.settings.current[planItem].PLAN_USER) + " ₽" : '');
+
+            }
+
+        }
     }
 
     function render_report(dFrom, dTo) {
@@ -316,7 +373,9 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
         }).done(function(data) {
             PlanFactAnalyz.fact = JSON.parse(data.trim());
             makeKards();
+            makeOtherKards();
             $('.report-title').text('Отчет за ' + PlanFactAnalyz.settings.currentTypeRu + " " + PlanFactAnalyz.settings.currentDate);
+            $('.time-title').text(PlanFactAnalyz.settings.currentTypeRu);
         });
     }
 
@@ -357,20 +416,21 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
     }
 
     function getSetPlan() {
+
         console.log('getSetPlan');
         switch (PlanFactAnalyz.settings.timeType) {
             case 'mounth':
-                PlanFactAnalyz.settings.current = PlanFactAnalyz.data.mounth[PlanFactAnalyz.settings.time + "-" + PlanFactAnalyz.settings.year];
+                PlanFactAnalyz.settings.current = (PlanFactAnalyz.data && PlanFactAnalyz.data.mounth && PlanFactAnalyz.data.mounth[PlanFactAnalyz.settings.time + "-" + PlanFactAnalyz.settings.year]) ? PlanFactAnalyz.data.mounth[PlanFactAnalyz.settings.time + "-" + PlanFactAnalyz.settings.year] : false;
                 PlanFactAnalyz.settings.currentDate = PlanFactAnalyz.settings.time + "-" + PlanFactAnalyz.settings.year;
                 PlanFactAnalyz.settings.currentTypeRu = 'месяц';
                 break;
             case 'year':
-                PlanFactAnalyz.settings.current = PlanFactAnalyz.data.year[PlanFactAnalyz.settings.year];
+                PlanFactAnalyz.settings.current = (PlanFactAnalyz.data && PlanFactAnalyz.data.year && PlanFactAnalyz.data.year[PlanFactAnalyz.settings.year]) ? PlanFactAnalyz.data.year[PlanFactAnalyz.settings.year] : false;
                 PlanFactAnalyz.settings.currentDate = PlanFactAnalyz.settings.year;
                 PlanFactAnalyz.settings.currentTypeRu = 'год';
                 break;
             case 'quarter':
-                PlanFactAnalyz.settings.current = PlanFactAnalyz.data.quarter[PlanFactAnalyz.settings.time + "/" + PlanFactAnalyz.settings.year];
+                PlanFactAnalyz.settings.current = (PlanFactAnalyz.data && PlanFactAnalyz.data.quarter && PlanFactAnalyz.data.quarter[PlanFactAnalyz.settings.time + "/" + PlanFactAnalyz.settings.year]) ? PlanFactAnalyz.data.quarter[PlanFactAnalyz.settings.time + "/" + PlanFactAnalyz.settings.year] : false;
                 PlanFactAnalyz.settings.currentDate = PlanFactAnalyz.settings.time + "/" + PlanFactAnalyz.settings.year;
                 PlanFactAnalyz.settings.currentTypeRu = 'квартал';
                 break;
@@ -389,10 +449,19 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
         $('#0-user').attr('readonly', 'true');
     }
 
+    function hideinputs() {
+        $('#form-user-settings').hide();
+    }
+
+    function showinputs() {
+        $('#form-user-settings').show();
+    }
+
     function parseTimeFilter() {
         PlanFactAnalyz.settings.timeType = $('input[name="time-type"]:checked').val();
         PlanFactAnalyz.settings.time = $('select[name="time"]').val();
         PlanFactAnalyz.settings.year = $('select[name="time-year"]').val();
+        document.location.hash = '#-' + PlanFactAnalyz.settings.time + '-' + PlanFactAnalyz.settings.timeType + '-' + PlanFactAnalyz.settings.year;
 
         switch (PlanFactAnalyz.settings.timeType) {
             case 'mounth':
@@ -446,10 +515,10 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 
     function submitSettings() {
         let gets = (function() {
-            var a = $('#form-user-settings').serialize();
-            var b = new Object();
+            let a = '&' + $('#form-user-settings').serialize();
+            let b = new Object();
             a = a.substring(1).split("&");
-            for (var i = 0; i < a.length; i++) {
+            for (let i = 0; i < a.length; i++) {
                 c = a[i].split("=");
                 b[c[0]] = c[1];
             }
@@ -469,6 +538,8 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             //console.log(data);
             let timeType = PlanFactAnalyz.settings.timeType;
             let time = PlanFactAnalyz.settings.currentDate;
+            document.location.hash = '#-' + PlanFactAnalyz.settings.time + '-' + PlanFactAnalyz.settings.timeType + '-' + PlanFactAnalyz.settings.year;
+            if (!PlanFactAnalyz.data) PlanFactAnalyz.data = {};
             if (!PlanFactAnalyz.data[timeType]) PlanFactAnalyz.data[timeType] = {};
             for (let userkey in gets) {
                 if (!PlanFactAnalyz.data[timeType][time]) PlanFactAnalyz.data[timeType][time] = {};
@@ -481,7 +552,8 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             }
             $('.setting-success').show();
             $('.setting-success').fadeOut(15000);
-            parseTimeFilter();
+            document.location.reload();
+            //parseTimeFilter();
         });
 
 
@@ -515,14 +587,16 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                         },
                         "slices": {
                             "template": {
-                                "propertyFields": {"fill":'color'},
+                                "propertyFields": {
+                                    "fill": 'color'
+                                },
                             }
                         }
                     }],
                     "depth": 6,
                     "innerRadius": "40%",
                     "radius": "60%",
-                    
+
                 },
                 document.getElementById(`${userId}-chart-category`)
             );
@@ -577,8 +651,8 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 
     function bindClickActionAcordeon() {
 
-        $('#report_block .user-card').first().addClass('active');
-        $('#report_block .open-click').not(':first').nextAll().hide();
+        //$('#report_block .user-card').first().addClass('active');
+        $('#report_block .open-click').nextAll().hide();
 
         $('#report_block .open-click').click(function() {
             $('#report_block .user-card[data-id="' + $(this).data('id') + '"] .open-click').parent().toggleClass('active');
@@ -588,8 +662,9 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
         /******При изменении инпутов калькулировать в общий план*******/
         $('#form-user-settings input').bind('input', function() {
             $('#0-user').val(summInputsToCompany());
-			$('.button-users-settings').addClass('pushthebutton');
+            $('.button-users-settings').addClass('pushthebutton');
         });
+
     }
 
     function summInputsToCompany() {
@@ -606,32 +681,67 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 
 
     $(document).ready(function() {
+        if (document.location.hash) {
+            let arSettingTime = document.location.hash.split('-');
+            $('input[value="' + arSettingTime[2] + '"]').click();
+            $('select[name="time"] option[value="' + arSettingTime[1] + '"]').prop('selected', true);
+            $('select[name="time-year"] option[value="' + arSettingTime[3] + '"]').prop('selected', true);
+        } else {
+            let nowDate = new Date();
+            let st = ((nowDate.getMonth() * 1 + 1) <= 9) ? '0' : '';
+            $('select[name="time"] option[value="' + st + '' + (nowDate.getMonth() * 1 + 1) + '"]').prop('selected', true);
+            $('select[name="time-year"] option[value="' + (nowDate.getFullYear()) + '"]').prop('selected', true);
+        }
 
-        let nowDate = new Date();
-        let st = ((nowDate.getMonth() * 1 + 1) <= 9) ? '0' : '';
-        $('select[name="time"] option[value="' + st + '' + (nowDate.getMonth() * 1 + 1) + '"]').prop('selected', true);
-        $('select[name="time-year"] option[value="' + (nowDate.getFullYear()) + '"]').prop('selected', true);
         parseTimeFilter();
 
         $('input[name="time-type"]').click(function() {
             typeTimeEdit();
-			blockedInputs();
+            blockedInputs();
+            hideinputs();
         });
 
         $('#submit-button').click(function() {
             parseTimeFilter();
-			$(this).removeClass('pushthebutton');
-
+            $(this).removeClass('pushthebutton');
+            showinputs();
         });
 
         $('.button-users-settings').click(function() {
             submitSettings();
-			$(this).removeClass('pushthebutton');
+            $(this).removeClass('pushthebutton');
         });
 
-        $('[name="time"], [class="time-year"]').change(function(){
+        $('[name="time"], [class="time-year"]').change(function() {
             $('#submit-button').addClass('pushthebutton');
         });
+
+        $('select[name="time"]').change(function() {
+
+            if (PlanFactAnalyz.settings.time == $(this).val()) {
+                unblockedInputs();
+                showinputs();
+            } else {
+                blockedInputs();
+                hideinputs();
+            }
+        });
+
+        $('select[name="year"]').change(function() {
+
+            if (PlanFactAnalyz.settings.year == $(this).val()) {
+                unblockedInputs();
+                showinputs();
+            } else {
+                blockedInputs();
+                hideinputs();
+            }
+        });
+
+		 $('.js-allreport').click(function() {
+            $('#report_block .open-click').nextAll().slideToggle();
+        });
+
 
     });
 </script>
