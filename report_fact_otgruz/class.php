@@ -141,6 +141,8 @@ class Report extends CBitrixComponent
 
         $arResult['DEBUG_MSG'] = self::$arDebug;
 
+		$arResult['USERS'] = self::$arrUSERS;
+
         $this->IncludeComponentTemplate();
     } // function
 
@@ -184,6 +186,8 @@ class Report extends CBitrixComponent
             );
             while ($ar = $res->Fetch()) {
                 $arLists['users'][$ar['ID']] = $ar;
+				$arrFile = CFile::ResizeImageGet($ar['PERSONAL_PHOTO'], array('width'=>40, 'height'=>40), BX_RESIZE_IMAGE_EXACT, true);
+				$arLists['users'][$ar['ID']]['PHOTO'] = $arrFile;
             }
 
             //print_r($arLists);
@@ -256,7 +260,7 @@ class Report extends CBitrixComponent
                             'PRODUCT_GROUP'=> $arTask["UF_AUTO_213360623899"],
                             'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                             'BP_ID'=> $arTask["UF_AUTO_333119548596"],
-                            'SUMM_FOR_DEAL' => $arTask["UF_AUTO_218498756460"],
+                            'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
                             'TASK_ID' => $arTask["ID"],
                             'TASK_TITLE' = $arTask['TITLE']
                         ]);
@@ -308,7 +312,7 @@ class Report extends CBitrixComponent
                             'result'  => &$result,
                             'deal_id' => $deal_id,
                             'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"],
-                            'SUMM_FOR_DEAL' => $arTask["UF_AUTO_218498756460"],
+                            'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
                         ]);
         */
         $result = &$params['result'];
@@ -337,7 +341,7 @@ class Report extends CBitrixComponent
                             'result'  => &$result,
                             'deal_id' => $deal_id,
                             'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"],
-                            'SUMM_FOR_DEAL' => $arTask["UF_AUTO_218498756460"],
+                            'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
                         ]);
         */
         $result = &$params['result'];
@@ -387,12 +391,12 @@ class Report extends CBitrixComponent
         //UF_AUTO_213360623899 - 'Группа Товаров'
         //UF_AUTO_732134480270 - 'Категория Сделки'
         //UF_AUTO_333119548596 - 'ID бизнес-процесса'
-        //UF_AUTO_218498756460 - 'Сумма сделки'
+        //UF_AUTO_779960634145 - 'Сумма сделки'
 
         $res = CTasks::GetList(
             array("UF_AUTO_841972304973" => "ASC"),
             $t_arFilter,
-            array('UF_CRM_TASK', 'DESCRIPTION', 'CLOSED_DATE', "TITLE", 'ID', 'UF_AUTO_841972304973', 'UF_AUTO_213360623899', 'UF_AUTO_732134480270', 'UF_AUTO_333119548596', 'UF_AUTO_218498756460')
+            array('UF_CRM_TASK', 'DESCRIPTION', 'CLOSED_DATE', "TITLE", 'ID', 'UF_AUTO_841972304973', 'UF_AUTO_213360623899', 'UF_AUTO_732134480270', 'UF_AUTO_333119548596', 'UF_AUTO_779960634145')
         );
 
         while ($arTask = $res->GetNext()) {
@@ -447,7 +451,7 @@ class Report extends CBitrixComponent
                     'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
-                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_218498756460"],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
                     //'SUMM_FOR_DEAL' => $arTask["SUMMA_SDELKI_BEZ_NDS"],
                     'TASK_ID' => $arTask["ID"],
                     'TASK_TITLE' => $arTask['TITLE']
@@ -457,14 +461,14 @@ class Report extends CBitrixComponent
                     'result'  => &$result,
                     'deal_id' => $deal_id,
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
-                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_218498756460"],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
                 ]);
             } elseif ($arTask["UF_AUTO_732134480270"] == 'СОПРОВОЖДЕНИЕ') {
                 self::fReport_hlp_AddElement_TOTALS_SUPPORT([
                     'result'  => &$result,
                     'deal_id' => $deal_id,
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
-                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_218498756460"],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
                 ]);
             }
 
