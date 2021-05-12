@@ -85,9 +85,9 @@ while($arPlan = $rsData->Fetch()){
     $month = explode("-", $month);
     if ($month[0]<=3) {
    		 $arrPlans['quarter']['01'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
-    } elseif ($month[0]<=9) {
+    } elseif ($month[0]<=9 && $month[0]>3) {
     	$arrPlans['quarter']['02'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
-    } elseif ($month[0]<=12) {
+    } elseif ($month[0]<=12 && $month[0]>9) {
     	$arrPlans['quarter']['03'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
     }
     $arrPlans['year'][$month[1]][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
