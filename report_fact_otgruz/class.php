@@ -141,6 +141,8 @@ class Report extends CBitrixComponent
 
         $arResult['DEBUG_MSG'] = self::$arDebug;
 
+		$arResult['USERS'] = self::$arrUSERS;
+
         $this->IncludeComponentTemplate();
     } // function
 
@@ -184,6 +186,8 @@ class Report extends CBitrixComponent
             );
             while ($ar = $res->Fetch()) {
                 $arLists['users'][$ar['ID']] = $ar;
+				$arrFile = CFile::ResizeImageGet($ar['PERSONAL_PHOTO'], array('width'=>40, 'height'=>40), BX_RESIZE_IMAGE_EXACT, true);
+				$arLists['users'][$ar['ID']]['PHOTO'] = $arrFile;
             }
 
             //print_r($arLists);
