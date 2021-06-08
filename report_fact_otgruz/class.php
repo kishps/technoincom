@@ -274,6 +274,8 @@ class Report extends CBitrixComponent
 
         $arrDeal = self::fReport_hlp_getDealInfo($params['deal_id']);
 
+        if (!in_array($assigned_id, array_keys(self::$arrUSERS))) return;
+
 		//если имя сотрудника пустое или строка с пробелом, заполняем
         if ($result['PLAN'][$assigned_id]['NAME'] == " " || !$result['PLAN'][$assigned_id]['NAME']) {
             $userFO = self::$arrUSERS[$assigned_id]['NAME'] . " " . self::$arrUSERS[$assigned_id]['LAST_NAME'];
