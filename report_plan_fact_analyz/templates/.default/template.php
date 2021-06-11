@@ -15,7 +15,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
 <div>
     <h1 class="report-title"></h1>
     <div class="js-allreport">
-        <svg  viewBox="0 0 100 80" width="40" height="40">
+        <svg viewBox="0 0 100 80" width="40" height="40">
             <rect width="100" height="15" rx="0"></rect>
             <rect y="30" width="100" height="15" rx="0"></rect>
             <rect y="60" width="100" height="15" rx="0"></rect>
@@ -78,17 +78,17 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
         </div>
         <div class="users">
             <form id="form-user-settings">
-                <?foreach ($arResult['USERS']['users'] as $user){?>
-                <div class="user" data-user="<?= $user['ID'] ?>">
-                    <div class="user-info">
-                        <?= $user['NAME'] . " " . $user['LAST_NAME'] ?>
+                <? foreach ($arResult['USERS']['users'] as $user) { ?>
+                    <div class="user" data-user="<?= $user['ID'] ?>">
+                        <div class="user-info">
+                            <?= $user['NAME'] . " " . $user['LAST_NAME'] ?>
+                        </div>
+                        <div class="user-plan">
+                            <label for="<?= $user['ID'] ?>-user"></label>
+                            <input id="<?= $user['ID'] ?>-user" type="text" name="<?= $user['ID'] ?>" value="">
+                        </div>
                     </div>
-                    <div class="user-plan">
-                        <label for="<?= $user['ID'] ?>-user"></label>
-                        <input id="<?= $user['ID'] ?>-user" type="text" name="<?= $user['ID'] ?>" value="">
-                    </div>
-                </div>
-                <?}?>
+                <? } ?>
                 <div class="user" data-user="0">
                     <div class="user-info">
                         <b>Компания</b>
@@ -357,6 +357,33 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             }
 
         }
+
+        let usersEmpty = PlanFactAnalyz.fact.USERS;
+        for (let planItem in usersEmpty) {
+            if (PlanFactAnalyz.settings && PlanFactAnalyz.settings.current && PlanFactAnalyz.settings.current[planItem] && PlanFactAnalyz.settings.current[planItem].PLAN_USER) continue;
+            if (planItem == 0 || planItem === 0) continue;
+
+            let cardPlanItem = `<div class="user-card" data-id="${planItem}">
+                                    <div class="user-plan">
+                                        <div class="photo-img"><img src="${PlanFactAnalyz.fact.USERS[planItem].PHOTO.src}" alt="${PlanFactAnalyz.fact.USERS[planItem].NAME}"></div>
+                                        <div class="user-plan-name">
+                                            ${PlanFactAnalyz.fact.USERS[planItem].NAME} ${PlanFactAnalyz.fact.USERS[planItem].LAST_NAME}
+                                        </div>
+                                       
+                                        </div>
+                                    </div>
+                                </div>
+            `;
+
+            if ($('.user-card.company').length > 0) {
+                $('.user-card.company').before(cardPlanItem);
+                console.log('before');
+            } else {
+                $('#plans').prepend(cardPlanItem);
+                console.log('prepend');
+            }
+
+        }
     }
 
     function render_report(dFrom, dTo) {
@@ -376,6 +403,14 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             makeOtherKards();
             $('.report-title').text('Отчет за ' + PlanFactAnalyz.settings.currentTypeRu + " " + PlanFactAnalyz.settings.currentDate);
             $('.time-title').text(PlanFactAnalyz.settings.currentTypeRu);
+            /**сортировка как в плане  */
+            Object.entries($('.user[data-user]'))
+                .map((el) => {
+                    if ($(el).hasClass('user')) {
+                        return $(el[1]).data('user')
+                    }
+                })
+                .forEach((el1) => $('#plans').append($(`.user-card[data-id="${el1}"`)));
         });
     }
 
@@ -665,6 +700,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             $('.button-users-settings').addClass('pushthebutton');
         });
 
+
     }
 
     function summInputsToCompany() {
@@ -738,7 +774,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
             }
         });
 
-		 $('.js-allreport').click(function() {
+        $('.js-allreport').click(function() {
             $('#report_block .open-click').nextAll().slideToggle();
         });
 
