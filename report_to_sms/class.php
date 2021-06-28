@@ -47,9 +47,7 @@ class Report extends CBitrixComponent
 
     public function onPrepareComponentParams($arParams)
     {
-        $result = [
-            'flagTest' => isset($arParams['flagTest']) ? $arParams['flagTest'] : false,
-        ];
+        $result = $arParams;
 
         return $result;
     } // function
@@ -124,7 +122,7 @@ class Report extends CBitrixComponent
             'F_USER'      => '',
         ];
 
-        $params = \SP\Helper::getFromRequest([
+		/*$params = \SP\Helper::getFromRequest([
             'F_SET_FILTER',
             'EXPORT_TO_XLS',
 
@@ -134,10 +132,39 @@ class Report extends CBitrixComponent
             'F_DATE_DAYS',
             'F_USER',
             'param_filter_forTable'
-        ]);
+]);*/
 
+		//self::fLog($params, 'fReport $params');
+		//self::fLog($this->arParams, 'fReport $this->arParams');
 
-        
+		$params=[
+			'EXPORT_TO_XLS'=>'',
+			'F_DATE_DAYS'=>'1',
+			'F_DATE_FROM'=>$arParams['SMS_DATE'],
+			'F_DATE_TO'=>$arParams['SMS_DATE'],
+			'F_DATE_TYPE'=>'interval',
+			'F_SET_FILTER'=>'Применить',
+			'F_USER'=>$arParams['SMS_USER_ID'],
+			'param_filter_forTable' => [
+				0=> "a_orders_shipped",
+				1=> "a_orders_shipped_summ",
+				2=> "c_production",
+				3=> "c_production_summ",
+				4=> "e_planned_shipments",
+				5=> "f_prihod_ds",
+				6=> "g_summ_for_deal",
+				7=> "h_call_outgoing",
+				8=> "i_call_outgoing_2min",
+				9=> "j_email_sent",
+				10=> "k_conversion_company",
+				11=> "l_calc_deal",
+				12=> "m_deal_failed",
+				13=> "o_product_testing",
+				14=> "p_product_testing_complete",
+				15=> "q_prihod_ds_whithNDS"
+			]
+		];
+
 
         self::$param_filter_forTable = $params['param_filter_forTable'];
       //self::fLog(self::$param_filter_forTable, 'self::$param_filter_forTable');
@@ -329,6 +356,38 @@ class Report extends CBitrixComponent
         $arResult['REPORT_ERROR_MSG'] = self::$arError;
 
         $arResult['DEBUG_MSG'] = self::$arDebug;
+		/*---------------------------------------------BEGIN Добавление в сделку строки для СМС------------------------------*/
+		//self::fLog($arResult, 'fReport $arResult');
+
+		if (\Bitrix\Main\Loader::includeModule('crm')) {
+				$dataForUser = "Отчет за ".$arParams['SMS_DATE'].": Звонки исходящие - ".$arResult['DATA']['total']['items']['h_call_outgoing']['count']
+																.": Звонки исходящие (Более 2х мин) - ".$arResult['DATA']['total']['items']['i_call_outgoing_2min']['count']
+																.": E-mail отправленные - ".$arResult['DATA']['total']['items']['j_email_sent']['count']
+																.": Конверсия Компаний из ПКБ в АКБ - ".$arResult['DATA']['total']['items']['k_conversion_company']['count']
+																.": Открыто Сделок в расчет ПТО - ".$arResult['DATA']['total']['items']['l_calc_deal']['count']
+																.": Забраковано Сделок - ".$arResult['DATA']['total']['items']['m_deal_failed']['count']
+																.": Открыто Испытаний - ".$arResult['DATA']['total']['items']['o_product_testing']['count']
+																.": Завершено Испытаний - ".$arResult['DATA']['total']['items']['p_product_testing_complete']['count']
+																.": Запущен БП Производства Заказа - ".$arResult['DATA']['total']['items']['c_production']['count']
+																.": Cумма запущенных в пр-во заказов (руб без НДС) - ".$arResult['DATA']['total']['items']['c_production_summ']['price']
+																.": Отгружено Заказов - ".$arResult['DATA']['total']['items']['a_orders_shipped']['count']
+																.": Сумма отгруженных заказов (руб без НДС) - ".$arResult['DATA']['total']['items']['a_orders_shipped_summ']['price']
+																.": Приход ДС (руб без НДС) - ".$arResult['DATA']['total']['items']['f_prihod_ds']['price']
+																.": Приход ДС (руб с НДС) - ".$arResult['DATA']['total']['items']['q_prihod_ds_whithNDS']['price']
+																.": Ожидаемые поступления без НДС - ".$arResult['DATA']['total']['items']['g_summ_for_deal']['price']
+																.": Планируемые отгрузки - ".$arResult['DATA']['total']['items']['e_planned_shipments']['price']
+																;
+
+				$entity = new CCrmDeal(true);//true - проверять права на доступ
+					$fields = array( 
+						'UF_CRM_1622202952' => $dataForUser
+					); 
+				$entity->update($this->arParams['SMS_ID_DEAL'], $fields);
+		}
+
+
+
+		/*---------------------------------------------END Добавление в сделку строки для СМС------------------------------*/
 
         $this->IncludeComponentTemplate();
     } // function
@@ -1658,11 +1717,11 @@ class Report extends CBitrixComponent
         if (!CModule::IncludeModule("tasks")) return;
 
         if (is_null($params['dateTo'])) {
-            $t_arFilter = array("TITLE" => "%Осуществите Производство по Заказу%", /*"RESPONSIBLE_ID" => "22",*/ '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'));
+            $t_arFilter = array("TITLE" => "%произвести заказ%", "RESPONSIBLE_ID" => "22", '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'));
         } else {
             $t_arFilter = array(
-                "TITLE" => "%Осуществите Производство по Заказу%",
-                //"RESPONSIBLE_ID" => "22",
+                "TITLE" => "%произвести заказ%",
+                "RESPONSIBLE_ID" => "22",
                 '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'),
                 '<=CLOSED_DATE' => $params['dateTo']->format('d.m.Y')
             );
@@ -1671,7 +1730,7 @@ class Report extends CBitrixComponent
         $res = CTasks::GetList(
             array("TITLE" => "ASC"),
             $t_arFilter,
-            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID','UF_AUTO_779960634145')
+            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID')
         );
 
         while ($arTask = $res->GetNext()) {
@@ -1845,15 +1904,15 @@ class Report extends CBitrixComponent
         echo "<script> console.log(\"params\")</script>";
         echo "<script> console.log({$varvarDUMP})</script>";*/
 
-        // Выбираем задачи
+        // Выбираем все задачи пользователя с ID = 22
         if (!CModule::IncludeModule("tasks")) return;
 
         if (is_null($params['dateTo'])) {
-            $t_arFilter = array("TITLE" => "%Осуществите Производство по Заказу%", /*"RESPONSIBLE_ID" => "22",*/ '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'));
+            $t_arFilter = array("TITLE" => "%произвести заказ%", "RESPONSIBLE_ID" => "22", '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'));
         } else {
             $t_arFilter = array(
-                "TITLE" => "%Осуществите Производство по Заказу%",
-                //"RESPONSIBLE_ID" => "22",
+                "TITLE" => "%произвести заказ%",
+                "RESPONSIBLE_ID" => "22",
                 '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'),
                 '<=CLOSED_DATE' => $params['dateTo']->format('d.m.Y')
             );
@@ -1862,19 +1921,18 @@ class Report extends CBitrixComponent
         $res = CTasks::GetList(
             array("TITLE" => "ASC"),
             $t_arFilter,
-            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID','UF_AUTO_779960634145')
+            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID')
         );
 
         while ($arTask = $res->GetNext()) {
             //echo "Task name: ".$arTask["TITLE"]."<br>";
             // разбиваем description на <tr>
-            /* $arrTrTableDescriptonTask = explode('[/TR]', $arTask['DESCRIPTION']);
+            $arrTrTableDescriptonTask = explode('[/TR]', $arTask['DESCRIPTION']);
             foreach ($arrTrTableDescriptonTask as $trItem) {
                 if (strrpos($trItem, 'Стоимость Заказа по Спецификации без НДС') > 0)
                     $tdItem = explode('[/TD]', $trItem);  //// разбиваем <tr> на <td>
             }
-            $arTask['SUMMA_SDELKI_BEZ_NDS'] = str_replace('[TD]', '', trim($tdItem[1], '|RUB')) * 1; */
-            $arTask['SUMMA_SDELKI_BEZ_NDS'] = $arTask['UF_AUTO_779960634145'];
+            $arTask['SUMMA_SDELKI_BEZ_NDS'] = str_replace('[TD]', '', trim($tdItem[1], '|RUB')) * 1;
             foreach ($arTask['UF_CRM_TASK'] as $crm) {
                 if (strrpos($crm, 'D_') === 0) {
                     $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
@@ -1924,7 +1982,7 @@ class Report extends CBitrixComponent
             $result[$time]['items'][$resultKey]['price'] += $price;
             $result[$time]['detail'][$deal_id][$resultKey]['items'][$arTask['ID']] = [
                 'title' => $title,
-                'link'  => "/company/personal/user/63/tasks/task/view/{$arTask['ID']}/",
+                'link'  => "/company/personal/user/22/tasks/task/view/{$arTask['ID']}/",
             ];
         }
 
@@ -2575,7 +2633,7 @@ class Report extends CBitrixComponent
         }
 
         if (!empty($params['number_2_digit'])) {
-            $style['numberFormat']['formatCode'] = '# ##0.00';
+            $style['numberFormat']['formatCode'] = '# ##0.00';
         }
 
         if (!empty($params['wrapText'])) {
