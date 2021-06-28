@@ -453,7 +453,7 @@ class Report extends CBitrixComponent
                     'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
-                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
                     //'SUMM_FOR_DEAL' => $arTask["SUMMA_SDELKI_BEZ_NDS"],
                     'TASK_ID' => $arTask["ID"],
                     'TASK_TITLE' => $arTask['TITLE']
