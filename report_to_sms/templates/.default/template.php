@@ -1,6 +1,6 @@
 <?php
-if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
-
+//if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
+/*
 //SP_Log::consoleLog($arResult['DATA'], '$arResult');
 
 // ###########################
@@ -18,6 +18,16 @@ $ar = [
 if (in_array($F_DATE_TYPE, $ar)) {
     $classFilterDate = $ar[$F_DATE_TYPE];
 }
+echo "<script> console.log('arResult',".json_encode($arResult).")</script>";
+
+$logFields = [
+					"SEVERITY"      => "INFO",
+					"AUDIT_TYPE_ID" => "EXCHANGE_EXCEPTION",
+					"MODULE_ID"     => "sale",
+					"ITEM_ID"       => '',
+					"DESCRIPTION"   => print_r($_REQUEST,true),
+				];
+\CEventLog::Add($logFields);
 
 $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
 
@@ -210,7 +220,7 @@ $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
             } else {
                 $USER_STR = 'Все сотрудники отдела';
             }
-        */?>
+*//*?>
     <div class="m-header">Период: <?= $arResult['PERIOD_STR'] ?></div>
     <div class="m-header">Сотрудник: <?= $arResult['USER_STR'] ?></div>
 
@@ -283,7 +293,7 @@ $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
             <?/*
                                 $result[ time ]['detail'][ deal_id ]['call_outgoing']['count']
                                 $result[ time ]['detail'][ deal_id ]['product_testing']['items'][ element_id ]['title']
-                            */?>
+*//*?>
             <?foreach ($value['detail'] as $key_deal_id => $value_2): // ['call_outgoing']['count'] ?>
             <tr class="row-detail" data-date="<?= date('d.m.Y', $key_time) ?>">
                 <td>
