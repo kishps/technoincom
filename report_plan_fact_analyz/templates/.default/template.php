@@ -2,9 +2,9 @@
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amcharts4_maps"));
 ?><?php
-if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
-CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amcharts4_maps"));
-?>
+    if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
+    CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amcharts4_maps"));
+    ?>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="/bitrix/js/main/amcharts/4.8.5//themes/material.js"></script>
@@ -414,6 +414,14 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                     }
                 })
                 .forEach((el1) => $('#plans').append($(`.user-card[data-id="${el1}"`)));
+
+            /** Перенос компании вверх */
+            if ($('.user-card.company').length > 0) {
+                $('#plans').prepend($('.user-card.company'));
+            }
+            if ($('.user[data-user="0"]').length > 0) {
+                $('#form-user-settings').prepend($('.user[data-user="0"]'));
+            }
         });
     }
 
