@@ -1280,7 +1280,7 @@ class Report extends CBitrixComponent
                 $result[$time]['detail'][$deal_id][$resultKey]['items'][$ar['ID']] = [
                     'title' => $ar["PROPERTY_{$params['PROP_TITLE']}_VALUE"],
                     'price' => ($params['PROP_PRICE']) ? $ar["PROPERTY_{$params['PROP_PRICE']}_VALUE"] : 0,
-                    'link'  => "/bizproc/processes/{$IBLOCK_ID}/element/0/{$ar['ID']}/",
+                    'link'  => ($resultKey=='l_calc_deal')? "/crm/deal/details/$deal_id/" : "/bizproc/processes/{$IBLOCK_ID}/element/0/{$ar['ID']}/",
                 ];
             }
         } //
