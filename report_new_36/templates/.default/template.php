@@ -315,7 +315,7 @@ $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
                     <div>
                         <?
                                                                 $title = trim($value_3['title']);
-                                                                $title = (strlen($title)) ? $title : '***';
+                                                                $title = (strlen($title)) ? $title : '';
                                                             ?>
                         <?if ($value_3['link']): ?>
                         <?if ($key_items == 'orders_shipped'):?>
@@ -323,7 +323,7 @@ $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
                         <div>1</div>
                         <?else:?>
                         <a href="<?= $value_3['link'] ?>" target="_blank"><?= $title ?></a>
-                        <div><?= ($value_3['price']) ? number_format($value_3['price'], 2, ',', '&nbsp;') : '*' ?></div>
+                        <div><?= ($value_3['price']) ? number_format($value_3['price'], 2, ',', '&nbsp;') : '' ?></div>
                         <?endif?>
                         <?else: ?>
                         <?= $title ?>
