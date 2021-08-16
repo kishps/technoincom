@@ -110,8 +110,8 @@ class Report extends CBitrixComponent
             'a_orders_shipped_summ'      => 'Сумма отгруженных заказов (руб без НДС)',
             'f_prihod_ds'                => 'Приход ДС (руб без НДС)',
             'q_prihod_ds_whithNDS'       => 'Приход ДС (руб с НДС)',
-            'g_summ_for_deal'       => 'Ожидаемые поступления без НДС',    //добавили title нового столбца
-            'e_planned_shipments'       => 'Планируемые отгрузки',
+            'g_summ_for_deal'            => 'Ожидаемые поступления без НДС',    //добавили title нового столбца
+            'e_planned_shipments'        => 'Планируемые отгрузки',
         ];
 
         $order = array('e_planned_shipments','a_orders_shipped_summ','a_orders_shipped','g_summ_for_deal','f_prihod_ds','c_production','c_production_summ');
