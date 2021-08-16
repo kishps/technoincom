@@ -1672,7 +1672,7 @@ class Report extends CBitrixComponent
         if (!CModule::IncludeModule("tasks")) return;
 
         if (is_null($params['dateTo'])) {
-            $t_arFilter = array("TITLE" => "%произвести заказ%", "RESPONSIBLE_ID" => "22", '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'));
+            $t_arFilter = array("TITLE" => "%произвести заказ%", "RESPONSIBLE_ID" => "22", '>=CLOSED_DATE' => ($params['dateFrom'])?$params['dateFrom']->format('d.m.Y'):'');
         } else {
             $t_arFilter = array(
                 "TITLE" => "%произвести заказ%",
@@ -1863,7 +1863,7 @@ class Report extends CBitrixComponent
         if (!CModule::IncludeModule("tasks")) return;
 
         if (is_null($params['dateTo'])) {
-            $t_arFilter = array("TITLE" => "%произвести заказ%", "RESPONSIBLE_ID" => "22", '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'));
+            $t_arFilter = array("TITLE" => "%произвести заказ%", "RESPONSIBLE_ID" => "22", '>=CLOSED_DATE' => ($params['dateFrom'])?$params['dateFrom']->format('d.m.Y'):'');
         } else {
             $t_arFilter = array(
                 "TITLE" => "%произвести заказ%",
@@ -2028,7 +2028,7 @@ class Report extends CBitrixComponent
             $t_arFilter = [
                 'IBLOCK_ID'       => 17,
                 'CREATED_USER_ID' => $params['user_id'],
-                '>=' . 'PROPERTY_DATA_DATY_PRIKHODA_DS_PO_POSTAVKE_ISKHODYA_IZ_DATY' => $params['dateFrom']->format('Y-m-d'),
+                '>=' . 'PROPERTY_DATA_DATY_PRIKHODA_DS_PO_POSTAVKE_ISKHODYA_IZ_DATY' => ($params['dateFrom'])?$params['dateFrom']->format('d.m.Y'):'',
             ];
         } else {
             $t_arFilter = [
@@ -2110,7 +2110,7 @@ class Report extends CBitrixComponent
             $t_arFilter = [
                 'IBLOCK_ID'       => 17,
                 'CREATED_USER_ID' => $params['user_id'],
-                '>=' . 'PROPERTY_NA_KAKUYU_DATU_SOGLASOVAN_SROK_PROIZVODSTVA' => $params['dateFrom']->format('Y-m-d'),
+                '>=' . 'PROPERTY_NA_KAKUYU_DATU_SOGLASOVAN_SROK_PROIZVODSTVA' => ($params['dateFrom'])?$params['dateFrom']->format('d.m.Y'):'',
             ];
         } else {
             $t_arFilter = [
