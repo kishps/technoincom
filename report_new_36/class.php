@@ -85,11 +85,12 @@ class Report extends CBitrixComponent
         $arResult['PERIODS'] = [
             'month'     => 'этот месяц',
             'month_ago' => 'прошл. месяц',
-            'week'      => 'эта неделя',
-            'week_ago'  => 'прошл. неделя',
-            'days'      => 'за послед.',
-            'after'     => 'позже',
-            'before'    => 'раньше',
+            'month_next' => 'след. месяц',
+            //'week'      => 'эта неделя',
+            //'week_ago'  => 'прошл. неделя',
+            //'days'      => 'за послед.',
+            //'after'     => 'позже',
+            //'before'    => 'раньше',
             'interval'  => 'интервал',
             'all'       => 'за все время',
         ];
@@ -224,6 +225,10 @@ class Report extends CBitrixComponent
             case 'month_ago':
                 $dateFrom = new DateTime('first day of previous month');
                 $dateTo   = new DateTime('last day of previous month');
+                break;
+            case 'month_next':
+                $dateFrom = new DateTime('first day of next month');
+                $dateTo   = new DateTime('last day of next month');
                 break;
             case 'week':
             case 'week_ago':
