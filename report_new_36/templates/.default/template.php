@@ -1,7 +1,7 @@
 <?php
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
-//SP_Log::consoleLog($arResult['DATA'], '$arResult');
+//SP_Log::consoleLog($arResult, '$arResult');
 
 // ###########################
 
@@ -100,36 +100,40 @@ $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
                                     font: bold 13px/25px " Helvetica Neue",Helvetica,Arial,sans-serif; color: #555; text-shadow: #fff 0 1px 1px !important; cursor: pointer; outline: 0; cursor:pointer; overflow: visible; background: url(images/interface/buttons-sprite.png) repeat-x left -217px; background-position-x: left; background-position-y: -217px;" id="55">Показывать все</span>
 
                     </div>
+                    
+
                     <div class="fakeSelect_item">
-                        <input type="checkbox" name="param_filter_forTable[]" value="a_orders_shipped" id="1" <? if (in_array('Отгружено Заказов', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
-                        <label for="1" style="cursor: pointer;">Отгружено Заказов</label>
+                        <input type="checkbox" name="param_filter_forTable[]" value="e_planned_shipments" id="3" <? if (in_array('Планируемые отгрузки', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
+                        <label for="3" style="cursor: pointer;">Планируемые отгрузки</label>
                     </div>
                     <div class="fakeSelect_item">
                         <input type="checkbox" name="param_filter_forTable[]" value="a_orders_shipped_summ" id="21" <? if (in_array('Сумма отгруженных заказов (руб без НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
                         <label for="21" style="cursor: pointer;">Сумма отгруженных заказов (руб без НДС)</label>
                     </div>
                     <div class="fakeSelect_item">
-                        <input type="checkbox" name="param_filter_forTable[]" value="c_production" id="2" <? if (in_array('Запущен БП Производства Заказа', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
-                        <label for="2" style="cursor: pointer;">Запущен БП Производства Заказа</label>
-                    </div>
-
-                    <div class="fakeSelect_item">
-                        <input type="checkbox" name="param_filter_forTable[]" value="c_production_summ" id="31" <? if (in_array('Cумма запущенных в пр-во заказов (руб без НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
-                        <label for="31" style="cursor: pointer;">Cумма запущенных в пр-во заказов (руб без НДС)</label>
-                    </div>
-                    <div class="fakeSelect_item">
-                        <input type="checkbox" name="param_filter_forTable[]" value="e_planned_shipments" id="3" <? if (in_array('Планируемые отгрузки', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
-                        <label for="3" style="cursor: pointer;">Планируемые отгрузки</label>
-                    </div>
-
-                    <div class="fakeSelect_item">
-                        <input type="checkbox" name="param_filter_forTable[]" value="f_prihod_ds" id="4" <? if (in_array('Приход ДС (руб без НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
-                        <label for="4" style="cursor: pointer;">Приход ДС (руб без НДС)</label>
+                        <input type="checkbox" name="param_filter_forTable[]" value="a_orders_shipped" id="1" <? if (in_array('Отгружено Заказов', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
+                        <label for="1" style="cursor: pointer;">Отгружено Заказов</label>
                     </div>
                     <div class="fakeSelect_item">
                         <input type="checkbox" name="param_filter_forTable[]" value="g_summ_for_deal" id="5" <? if (in_array('Ожидаемые поступления без НДС', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
                         <label for="5" style="cursor: pointer;">Ожидаемые поступления без НДС</label>
                     </div>
+                    <div class="fakeSelect_item">
+                        <input type="checkbox" name="param_filter_forTable[]" value="f_prihod_ds" id="4" <? if (in_array('Приход ДС (руб без НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
+                        <label for="4" style="cursor: pointer;">Приход ДС (руб без НДС)</label>
+                    </div>
+                    <div class="fakeSelect_item">
+                        <input type="checkbox" name="param_filter_forTable[]" value="c_production" id="2" <? if (in_array('Запущен БП Производства Заказа', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
+                        <label for="2" style="cursor: pointer;">Запущен БП Производства Заказа</label>
+                    </div>
+                    <div class="fakeSelect_item">
+                        <input type="checkbox" name="param_filter_forTable[]" value="c_production_summ" id="31" <? if (in_array('Cумма запущенных в пр-во заказов (руб без НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
+                        <label for="31" style="cursor: pointer;">Cумма запущенных в пр-во заказов (руб без НДС)</label>
+                    </div>
+                  
+
+                   
+                    
                     <div class="fakeSelect_item">
                         <input type="checkbox" name="param_filter_forTable[]" value="h_call_outgoing" id="6" <? if (in_array('Звонки исходящие', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
                         <label for="6" style="cursor: pointer;">Звонки исходящие</label>

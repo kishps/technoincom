@@ -113,6 +113,15 @@ class Report extends CBitrixComponent
             'e_planned_shipments'       => 'Планируемые отгрузки',
         ];
 
+        $order = array('e_planned_shipments','a_orders_shipped_summ','a_orders_shipped','g_summ_for_deal','f_prihod_ds','c_production','c_production_summ');
+
+        uksort($arResult['DATA_TITLES'], function($key1, $key2) use ($order) {
+            return (array_search($key1, $order) > array_search($key2, $order));
+        });
+
+        //SP_Log::consoleLog(self::$itemKeys, 'itemKeys');
+
+
         $arLists = self::get_arLists();
         $arResult['USERS'] = $arLists['users'];
 
