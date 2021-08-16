@@ -80,15 +80,19 @@ $hlbl = 2; // Указываем ID нашего highloadblock блока к к�
 
 
 while($arPlan = $rsData->Fetch()){
-
+    
     $month  = $arPlan['UF_PLAN_TIME'];
     $month = explode("-", $month);
     if ($month[0]<=3) {
-   		 $arrPlans['quarter']['01'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
-    } elseif ($month[0]<=9 && $month[0]>3) {
+   	$arrPlans['quarter']['01'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
+    } elseif ($month[0]<=6 && $month[0]>3) {
+      if ($arPlan['UF_PLAN_USERID']==27) {echo "Тесля месяц ".$month[0]." план был ".$arrPlans['quarter']['02'][$arPlan['UF_PLAN_USERID']]." добавится ".$arPlan['UF_PLAN_USER']."\n";}
     	$arrPlans['quarter']['02'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
-    } elseif ($month[0]<=12 && $month[0]>9) {
+       if ($arPlan['UF_PLAN_USERID']==27) {echo "Тесля месяц ".$month[0]." план стал ".$arrPlans['quarter']['02'][$arPlan['UF_PLAN_USERID']]."\n";}
+    } elseif ($month[0]<=9 && $month[0]>6) {
     	$arrPlans['quarter']['03'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
+    } elseif ($month[0]<=12 && $month[0]>9) {
+    	$arrPlans['quarter']['04'][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
     }
     $arrPlans['year'][$month[1]][$arPlan['UF_PLAN_USERID']]+=$arPlan['UF_PLAN_USER'];
 

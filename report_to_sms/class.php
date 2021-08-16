@@ -360,29 +360,39 @@ class Report extends CBitrixComponent
 		//self::fLog($arResult, 'fReport $arResult');
 
 		if (\Bitrix\Main\Loader::includeModule('crm')) {
-				$dataForUser = "Отчет за ".$arParams['SMS_DATE'].": Звонки исходящие - ".$arResult['DATA']['total']['items']['h_call_outgoing']['count']
-																.": Звонки исходящие (Более 2х мин) - ".$arResult['DATA']['total']['items']['i_call_outgoing_2min']['count']
-																.": E-mail отправленные - ".$arResult['DATA']['total']['items']['j_email_sent']['count']
-																.": Конверсия Компаний из ПКБ в АКБ - ".$arResult['DATA']['total']['items']['k_conversion_company']['count']
-																.": Открыто Сделок в расчет ПТО - ".$arResult['DATA']['total']['items']['l_calc_deal']['count']
-																.": Забраковано Сделок - ".$arResult['DATA']['total']['items']['m_deal_failed']['count']
-																.": Открыто Испытаний - ".$arResult['DATA']['total']['items']['o_product_testing']['count']
-																.": Завершено Испытаний - ".$arResult['DATA']['total']['items']['p_product_testing_complete']['count']
-																.": Запущен БП Производства Заказа - ".$arResult['DATA']['total']['items']['c_production']['count']
-																.": Cумма запущенных в пр-во заказов (руб без НДС) - ".$arResult['DATA']['total']['items']['c_production_summ']['price']
-																.": Отгружено Заказов - ".$arResult['DATA']['total']['items']['a_orders_shipped']['count']
-																.": Сумма отгруженных заказов (руб без НДС) - ".$arResult['DATA']['total']['items']['a_orders_shipped_summ']['price']
-																.": Приход ДС (руб без НДС) - ".$arResult['DATA']['total']['items']['f_prihod_ds']['price']
-																.": Приход ДС (руб с НДС) - ".$arResult['DATA']['total']['items']['q_prihod_ds_whithNDS']['price']
-																.": Ожидаемые поступления без НДС - ".$arResult['DATA']['total']['items']['g_summ_for_deal']['price']
-																.": Планируемые отгрузки - ".$arResult['DATA']['total']['items']['e_planned_shipments']['price']
-																;
+				$dataForUser = "Отчет за ".$arParams['SMS_DATE']
+							//.": Звонки исходящие - ".$arResult['DATA']['total']['items']['h_call_outgoing']['count']
+							//.": Звонки исходящие (Более 2х мин) - ".$arResult['DATA']['total']['items']['i_call_outgoing_2min']['count']
+							//.": E-mail отправленные - ".$arResult['DATA']['total']['items']['j_email_sent']['count']
+							//.": Конверсия Компаний из ПКБ в АКБ - ".$arResult['DATA']['total']['items']['k_conversion_company']['count']
+							."; Открыто Сделок в расчет ПТО - ".$arResult['DATA']['total']['items']['l_calc_deal']['count']
+							//.": Забраковано Сделок - ".$arResult['DATA']['total']['items']['m_deal_failed']['count']
+							//.": Открыто Испытаний - ".$arResult['DATA']['total']['items']['o_product_testing']['count']
+							//.": Завершено Испытаний - ".$arResult['DATA']['total']['items']['p_product_testing_complete']['count']
+							."; Запущен БП Производства Заказа - ".$arResult['DATA']['total']['items']['c_production']['count']
+							."; Cумма запущенных в пр-во заказов (руб без НДС) - ".$arResult['DATA']['total']['items']['c_production_summ']['price']
+							."; Отгружено Заказов - ".$arResult['DATA']['total']['items']['a_orders_shipped']['count']
+							."; Сумма отгруженных заказов (руб без НДС) - ".$arResult['DATA']['total']['items']['a_orders_shipped_summ']['price']
+							//.": Приход ДС (руб без НДС) - ".$arResult['DATA']['total']['items']['f_prihod_ds']['price']
+							."; Приход ДС (руб с НДС) - ".$arResult['DATA']['total']['items']['q_prihod_ds_whithNDS']['price']
+							//.": Ожидаемые поступления без НДС - ".$arResult['DATA']['total']['items']['g_summ_for_deal']['price']
+							//.": Планируемые отгрузки - ".$arResult['DATA']['total']['items']['e_planned_shipments']['price']
+							;
 
 				$entity = new CCrmDeal(true);//true - проверять права на доступ
 					$fields = array( 
-						'UF_CRM_1622202952' => $dataForUser
+						'UF_CRM_1622202952' => $dataForUser,
 					); 
 				$entity->update($this->arParams['SMS_ID_DEAL'], $fields);
+				$headers = stream_context_create(array(
+				'http' => array(
+						'method' => 'POST',
+						'header' => 'Content-Type: application/x-www-form-urlencoded' . PHP_EOL,
+						'content' => 'login=admin&password=1234',
+					),
+				));
+				echo file_get_contents('https://bitrix.technoincom.ru/rest/63/w2pe7m6x0fvdadei/crm.deal.update.json?id='.$this->arParams['SMS_ID_DEAL'].'&fields[STAGE_ID]=C1:EXECUTING', false, $headers);
+
 		}
 
 
