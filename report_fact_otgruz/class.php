@@ -308,6 +308,65 @@ class Report extends CBitrixComponent
     } // function
 
 
+
+    public static function fReport_hlp_AddElement_SUPPORT($params)
+    {
+        /*  self::fReport_hlp_AddElement_SUPPORT([
+                            'result'  => &$result,
+                            'time'    => $time,
+                            'deal_id' => $deal_id,
+                            'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"],
+                            'PRODUCT_GROUP'=> $arTask["UF_AUTO_213360623899"],
+                            'CATEGORY' => $arTask["UF_AUTO_732134480270"],
+                            'BP_ID'=> $arTask["UF_AUTO_333119548596"],
+                            'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
+                            'TASK_ID' => $arTask["ID"],
+                            'TASK_TITLE' = $arTask['TITLE']
+                        ]);
+
+  
+        */
+        $result = &$params['result'];
+        $time   = $params['time'];
+        $assigned_id = $params['ASSIGNED_BY_ID'];
+        $task_id = $params['TASK_ID'];
+
+        $arrDeal = self::fReport_hlp_getDealInfo($params['deal_id']);
+
+        if (!in_array($assigned_id, array_keys(self::$arrUSERS))) return;
+
+		//если имя сотрудника пустое или строка с пробелом, заполняем
+        if ($result['SUPPORT'][$assigned_id]['NAME'] == " " || !$result['SUPPORT'][$assigned_id]['NAME']) {
+            $userFO = self::$arrUSERS[$assigned_id]['NAME'] . " " . self::$arrUSERS[$assigned_id]['LAST_NAME'];
+            $result['SUPPORT'][$assigned_id]['NAME'] = $userFO;
+			$result['SUPPORT'][$assigned_id]['ID'] = $assigned_id;
+			$arrFile = CFile::ResizeImageGet(self::$arrUSERS[$assigned_id]['PERSONAL_PHOTO'], array('width'=>40, 'height'=>40), BX_RESIZE_IMAGE_EXACT, true);
+			$result['SUPPORT'][$assigned_id]['PHOTO'] = $arrFile['src'];
+        }
+
+        $result['SUPPORT'][$assigned_id]['TASKS'][$task_id] = [
+            'ASSIGNED_ID' => $assigned_id,
+            'TITLE' => $params['TASK_TITLE'],
+            'ID' => $task_id,
+            'LINK' => '/workgroups/group/21/tasks/task/view/' . $task_id . '/',
+            'DEAL_ID' => $params['deal_id'],
+            'DEAL_TITLE' => $arrDeal['TITLE'],
+            'DEAL_LINK' => '/crm/deal/details/' . $params['deal_id'] . '/',
+            'DATE_CLOSED' => $time,
+            /*'PRODUCT_GROUP'=> self::$arrProductGroups[$params['PRODUCT_GROUP']],*/
+            'PRODUCT_GROUP' => $params['PRODUCT_GROUP'],
+            'SUMM_FOR_DEAL' => $params['SUMM_FOR_DEAL'],
+
+        ];
+        $result['SUPPORT'][$assigned_id]['TOTAL'] = $result['SUPPORT'][$assigned_id]['TOTAL'] * 1 + $params['SUMM_FOR_DEAL'] * 1;
+        $result['SUPPORT'][$assigned_id]['TOTAL_GROUPS'][$params['PRODUCT_GROUP']] = $result['SUPPORT'][$assigned_id]['TOTAL_GROUPS'][$params['PRODUCT_GROUP']] * 1 + $params['SUMM_FOR_DEAL'] * 1;
+
+        $result['SUPPORT']['ALL']['TOTAL'] = $result['SUPPORT']['ALL']['TOTAL'] * 1 + $params['SUMM_FOR_DEAL'] * 1;
+		 $result['SUPPORT']['ALL']['TOTAL_TASKS'] = $result['SUPPORT']['ALL']['TOTAL_TASKS'] * 1 + 1;
+        $result['SUPPORT']['ALL']['TOTAL_GROUPS'][$params['PRODUCT_GROUP']] = $result['SUPPORT']['ALL']['TOTAL_GROUPS'][$params['PRODUCT_GROUP']] * 1 + $params['SUMM_FOR_DEAL'] * 1;
+    } // function
+
+
     public static function fReport_hlp_AddElement_TOTALS_OWN($params)
     {
         /*  self::fReport_hlp_AddElement([
@@ -466,6 +525,22 @@ class Report extends CBitrixComponent
                     'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
                 ]);
             } elseif ($arTask["UF_AUTO_732134480270"] == 'СОПРОВОЖДЕНИЕ') {
+
+                self::fReport_hlp_AddElement_SUPPORT([
+                    'result'  => &$result,
+                    'time'    => $arTask['CLOSED_DATE'],
+                    'deal_id' => $deal_id,
+                    'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
+                    //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
+                    'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    'CATEGORY' => $arTask["UF_AUTO_732134480270"],
+                    'BP_ID' => $arTask["UF_AUTO_333119548596"],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
+                    //'SUMM_FOR_DEAL' => $arTask["SUMMA_SDELKI_BEZ_NDS"],
+                    'TASK_ID' => $arTask["ID"],
+                    'TASK_TITLE' => $arTask['TITLE']
+                ]);
+
                 self::fReport_hlp_AddElement_TOTALS_SUPPORT([
                     'result'  => &$result,
                     'deal_id' => $deal_id,

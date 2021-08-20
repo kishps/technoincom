@@ -604,6 +604,53 @@ div:not(.company) .table>div {
 .js-allreport svg:hover rect {
 	fill: #67b7dc;
 }
+div:not(.company) .table>div.container-table:not(.hidden-tab) {
+	flex-basis: 100%;
+	max-width: 100%;
+	width: 100% !important;
+}
+div:not(.company) .table>div.container-table table {
+	width:100% !important;
+}
+div:not(.company) .table table tbody tr td:first-child a {
+	display: block;
+	max-width: 300px;
+	width: 100%;
+	overflow: hidden;
+}
+div:not(.company) .table>div:not(.container-table) {
+	flex-basis: 20%;
+	max-width: 20%;
+	width: 100% !important;
+	min-width: 160px;
+}
+div:not(.company) .table>.container-table.hidden-tab {
+	flex-basis: 0%;
+	max-width: 0%;
+	width: 0% !important;
+	display: none;
+}
+.tabs_panel .tab {
+	display: inline-block;
+	border: 1px solid #e3e7ea;
+	border-radius: 3px;
+	margin-bottom: -1px;
+	padding: 10px 15px;
+	cursor: pointer;
+	margin-right: 10px;
+}
+.tabs_panel {
+	border-bottom: 1px solid #e3e7ea;
+	margin-bottom: 15px;
+	padding-bottom: 15px;
+}
+.tabs_panel .tab.active_tab {
+	background: #a7d5eb;
+	border-color: #a7d5eb;
+}
+.tabs_panel .tab:not(.active_tab):hover {
+	border-color: #a7d5eb;
+}
 
 /*---адаптивность---*/
 

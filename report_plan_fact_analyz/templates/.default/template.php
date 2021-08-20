@@ -118,6 +118,64 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
     PlanFactAnalyz.templateFolder = <?= json_encode($templateFolder) ?>;
     PlanFactAnalyz.settings = {};
 
+    function createTableSupport(element) {
+
+        $(`.user-card[data-id="${element}"] .table`).append(`<div class="container-table hidden-tab"><table class="table_support" data-id="${element}">
+                <thead>
+                                                <td>
+                                                    Задача
+                                                </td>
+                                                <td>
+                                                    Сделка
+                                                </td>
+                                                <td>
+                                                    Дата закрытия
+                                                </td>
+                                                <td>
+                                                    Группа товаров
+                                                </td>
+                                                <td>
+                                                    Сумма
+                                                </td>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                </table></div>`);
+        let arrSupport = PlanFactAnalyz.fact.DATA.SUPPORT;
+        for (task in arrSupport[element].TASKS) {
+            $(`table.table_support[data-id="${arrSupport[element].ID}"] tbody`).append(`
+                        <tr>
+                            <td>
+                                <a href="${arrSupport[element].TASKS[task].LINK}">${arrSupport[element].TASKS[task].TITLE}</a>
+                            </td>
+                            <td>
+                                <a href="${arrSupport[element].TASKS[task].DEAL_LINK}">${arrSupport[element].TASKS[task].DEAL_TITLE}</a>
+                            </td>
+                            <td>
+                                ${arrSupport[element].TASKS[task].DATE_CLOSED}
+                            </td>
+                            <td>
+                                ${arrSupport[element].TASKS[task].PRODUCT_GROUP}
+                            </td>
+                            <td>
+                                ${(arrSupport[element].TASKS[task].SUMM_FOR_DEAL)?new Intl.NumberFormat().format(arrSupport[element].TASKS[task].SUMM_FOR_DEAL)+"&nbsp;₽":''}
+                            </td>
+                        </tr>
+                        `);
+        }
+        $(`.user-card[data-id="${element}"] .table`).before(`<div class="tabs_panel">
+													<div class="tab active_tab" data_tabid="${element}" data-type="own">Собственные</div>
+                                                    <div class="tab" data_tabid="${element}" data-type="support">Сопровождение</div>
+                       </div>`);
+        $(`div.tab[data_tabid="${element}"]`).click(function() {
+            $(`table[data-id="${element}"]`).parent('div').addClass('hidden-tab');
+            $(`table.table_${$(this).data('type')}[data-id="${element}"]`).parent('div').removeClass('hidden-tab');
+            $(`div.tab[data_tabid="${element}"]`).removeClass('active_tab');
+            $(this).addClass('active_tab');
+        });
+    }
+
+
     function makeKards() {
         $('#plans').html('');
         arrFact = PlanFactAnalyz.fact.DATA.PLAN;
@@ -142,7 +200,8 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                                         <div class="total-count"><div>Количество отгрузок</div><div></div>${(arrFact[element].TASKS)?(Object.keys(arrFact[element].TASKS).length):''}</div>
                                     </div>
                                     <div class="table">
-                                        <table data-id="${arrFact[element].ID}">
+										<div class="container-table">
+                                        <table class="table_own" data-id="${arrFact[element].ID}">
                                             <thead>
                                                 <td>
                                                     Задача
@@ -163,6 +222,7 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                                             <tbody>
                                             </tbody>
                                         </table>
+										</div>
 										<div>
                                        <div id="${arrFact[element].ID}-chart" class="chart-groups"></div>
 										<div class="chart-title">Группы товаров</div>
@@ -238,7 +298,9 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                 }];
                 chartDealCategory(element, dataDealCategory);
 
-
+                if (PlanFactAnalyz.fact && PlanFactAnalyz.fact.DATA && PlanFactAnalyz.fact.DATA.SUPPORT && PlanFactAnalyz.fact.DATA.SUPPORT[element]) {
+                    createTableSupport(element);
+                }
 
             } else {
                 $('#plans').append(`<div class="user-card  company" data-id="0">
@@ -316,7 +378,9 @@ CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amchart
                 chartDealCategory(0, dataDealCategory);
 
             }
+
         }
+
         bindClickActionAcordeon();
     }
 
