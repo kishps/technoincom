@@ -555,6 +555,129 @@ class Report extends CBitrixComponent
             //'link'  => "/company/personal/user/22/tasks/task/view/{$arTask['ID']}/",
 
         }
+
+        if ($params['dateFrom'] && $params['dateTo']) {
+            $t_arFilter = array(
+                "TITLE" => "%ВЛОЖИТE СКАН НАКЛАДНОЙ ОТПРАВИТЕЛЯ В ТЕЛО ЗАДАЧИ%",
+                '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'),
+                '<=CLOSED_DATE' => $params['dateTo']->format('d.m.Y'),
+                //'UF_AUTO_732134480270' => 699,
+            );
+        } else {
+            $t_arFilter = array(
+                "TITLE" => "%ВЛОЖИТE СКАН НАКЛАДНОЙ ОТПРАВИТЕЛЯ В ТЕЛО ЗАДАЧИ%",
+                //'UF_AUTO_732134480270' => 699,
+            );
+        }
+
+
+        //UF_AUTO_841972304973 - 'ID Ответственный Менеджер'
+        //UF_AUTO_213360623899 - 'Группа Товаров'
+        //UF_AUTO_732134480270 - 'Категория Сделки'
+        //UF_AUTO_333119548596 - 'ID бизнес-процесса'
+        //UF_AUTO_779960634145 - 'Сумма сделки'
+
+        $res = CTasks::GetList(
+            array("UF_AUTO_841972304973" => "ASC"),
+            $t_arFilter,
+            array('UF_CRM_TASK', 'DESCRIPTION', 'CLOSED_DATE', "TITLE", 'ID', 'UF_AUTO_841972304973', 'UF_AUTO_213360623899', 'UF_AUTO_732134480270', 'UF_AUTO_333119548596', 'UF_AUTO_779960634145')
+        );
+
+        while ($arTask = $res->GetNext()) {
+            // разбиваем description на <tr> временное решение когда начнут заполняться поля закомментировать
+            /*$arrTrTableDescriptonTask = explode('[/TR]', $arTask['DESCRIPTION']);
+                        foreach ($arrTrTableDescriptonTask as $trItem) {
+                        if (strrpos($trItem, 'Стоимость Заказа по Спецификации без НДС')>0) $tdItem = explode('[/TD]', $trItem);  //// разбиваем <tr> на <td>
+                        }
+                        $arTask['SUMMA_SDELKI_BEZ_NDS'] = str_replace('[TD]','',trim($tdItem[1],'|RUB')) * 1;*/
+            //
+
+
+
+            foreach ($arTask['UF_CRM_TASK'] as $crm) {
+                if (strrpos($crm, 'D_') === 0) {
+                    $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
+                }
+            }
+
+            //узнаем ответственного по сделке, к которой приявязана задача
+            $rsDeal =  CCrmDeal::GetListEx(
+                $arOrder = array('CLOSEDATE' => 'asc'),
+                array('ID' => $arTask['UF_CRM_TASK']),
+                $arGroupBy = false,
+                $arNavStartParams = false,
+                $arSelectFields = array('ASSIGNED_BY_ID')
+            );
+            $ar = $rsDeal->GetNext();
+
+
+            //дата закрытия задачи
+            $timeTMP = MakeTimeStamp($arTask["CLOSED_DATE"]);
+            if (!$timeTMP) {
+                continue; // На всякий
+            }
+            $timeTMP = MakeTimeStamp($arTask['CLOSED_DATE']);
+            $time = new DateTime();
+            $time->setTimestamp($timeTMP);
+            $time->setTime(0, 0);
+            $time = $time->getTimestamp();
+
+            //id сделки
+            $deal_id = (int) $arTask['UF_CRM_TASK']; // 0 - не указана
+
+            if ($arTask["UF_AUTO_732134480270"] == 'СОБСТВЕННАЯ') {
+                self::fReport_hlp_AddElement([
+                    'result'  => &$result,
+                    'time'    => $arTask['CLOSED_DATE'],
+                    'deal_id' => $deal_id,
+                    'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
+                    //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
+                    'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    'CATEGORY' => $arTask["UF_AUTO_732134480270"],
+                    'BP_ID' => $arTask["UF_AUTO_333119548596"],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
+                    //'SUMM_FOR_DEAL' => $arTask["SUMMA_SDELKI_BEZ_NDS"],
+                    'TASK_ID' => $arTask["ID"],
+                    'TASK_TITLE' => $arTask['TITLE']
+                ]);
+
+                self::fReport_hlp_AddElement_TOTALS_OWN([
+                    'result'  => &$result,
+                    'deal_id' => $deal_id,
+                    'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
+                ]);
+            } elseif ($arTask["UF_AUTO_732134480270"] == 'СОПРОВОЖДЕНИЕ') {
+
+                self::fReport_hlp_AddElement_SUPPORT([
+                    'result'  => &$result,
+                    'time'    => $arTask['CLOSED_DATE'],
+                    'deal_id' => $deal_id,
+                    'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
+                    //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
+                    'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    'CATEGORY' => $arTask["UF_AUTO_732134480270"],
+                    'BP_ID' => $arTask["UF_AUTO_333119548596"],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
+                    //'SUMM_FOR_DEAL' => $arTask["SUMMA_SDELKI_BEZ_NDS"],
+                    'TASK_ID' => $arTask["ID"],
+                    'TASK_TITLE' => $arTask['TITLE']
+                ]);
+
+                self::fReport_hlp_AddElement_TOTALS_SUPPORT([
+                    'result'  => &$result,
+                    'deal_id' => $deal_id,
+                    'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
+                    'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"],
+                ]);
+            }
+
+            // $result[ $time ]['detail'][ $deal_id ][ $resultKey ]['items'][ $arTask['ID'] ] = [
+            //'title' => '1',
+            //'price' => "1",
+            //'link'  => "/company/personal/user/22/tasks/task/view/{$arTask['ID']}/",
+
+        }
     } // function
 
 
