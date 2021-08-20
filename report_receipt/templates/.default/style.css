@@ -1,0 +1,133 @@
+.bx24-connection-status {display: none !important}
+
+.sp-report .m-header {
+    margin-bottom: 20px;
+}
+.sp-report .m-error {
+    color: red;
+}
+.sp-report .footer-info {
+    margin-top: 50px;
+    color: lightgray;
+}
+.sp-report .m-data {
+    _overflow-x: scroll;
+}
+.sp-report .m-data table {
+    border-collapse: collapse;
+}
+.sp-report .m-data th {
+    background-color: #c1eaf9;
+}
+.sp-report .m-data th, .sp-report .m-data td {
+    border: 1px solid gray;
+    padding: 5px; 
+}
+
+.sp-report .m-data .m-date-left{
+    width: 100%;
+}
+
+.sp-report .m-data .m-date-left th {
+    font-size: 11px;
+    font-weight: normal;
+    font-family: "OpenSans-Semibold", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: #535c69;
+}
+.sp-report .m-data td {
+    font-size: 13px;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: #535c69;
+}
+
+.sp-report .m-data .row-main {
+    background-color: #eef2f4;
+    cursor: pointer;
+}
+
+.sp-report .m-data .row-main:hover {
+    background-color: #fff;
+}
+
+.sp-report .m-data .row-detail {
+    display: none;
+}
+
+.sp-report .m-data .row-detail:hover {
+    background-color: #eef2f4;
+}
+
+.sp-report .m-data .row-total {
+    background-color: #d6f1fb;
+}
+
+.custom_filter_forTable{
+    padding: 0 5px;
+    border: 1px solid rgb(169, 169, 169);
+    width: 85%;
+    position: relative;
+    cursor: context-menu; 
+}
+
+.custom_filter_forTable:hover{
+    border: 1px solid black;
+}
+
+.custom_filter_forTable::after{
+    content: '';
+    border: 3px solid transparent;
+    border-top: 6px solid #555;
+    display: block;
+    position: absolute;
+    right: 6px;
+    top: 5px;
+    
+}
+
+.fakeSelect{
+    display: none;
+}
+
+.open{
+    display: table-row;
+}
+
+.fakeSelect_item{
+    margin-top: 5px;
+}
+
+.fakeSelect_item input, .fakeSelect_item_all input{
+    margin: 0;
+    vertical-align: middle;
+}
+
+.fakeSelect_item label{
+    margin-bottom: 5px; 
+    font-size: 13px;
+    text-overflow: ellipsis;
+    word-wrap: unset;
+    overflow-x: hidden;
+}
+
+.fakeSelect_item:hover {
+   color: #2067b0;
+}
+span.webform-field-textbox-inner input{
+    width: 100%;
+}
+
+div.filter-field span.webform-field-textbox-inner{
+    background-color: #fff;
+    padding: 0 20px 0 4px;
+    position: relative;
+    width: 200px;
+}
+.webform-field-textbox-clear{
+    top: -3px;
+    right: -3px;
+}
+.filter-field-company{
+    padding-top: 8px;
+}
