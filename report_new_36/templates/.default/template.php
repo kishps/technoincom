@@ -122,6 +122,10 @@ $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
                         <input type="checkbox" name="param_filter_forTable[]" value="f_prihod_ds" id="4" <? if (in_array('Приход ДС (руб без НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
                         <label for="4" style="cursor: pointer;">Приход ДС (руб без НДС)</label>
                     </div>
+					<div class="fakeSelect_item">
+                        <input type="checkbox" name="param_filter_forTable[]" value="q_prihod_ds_whithNDS" id="14" <? if (in_array('Приход ДС (руб с НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
+                        <label for="14" style="cursor: pointer;">Приход ДС (руб с НДС)</label>
+                    </div>
                     <div class="fakeSelect_item">
                         <input type="checkbox" name="param_filter_forTable[]" value="c_production" id="2" <? if (in_array('Запущен БП Производства Заказа', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
                         <label for="2" style="cursor: pointer;">Запущен БП Производства Заказа</label>
@@ -172,10 +176,7 @@ $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
 
 
 
-                    <div class="fakeSelect_item">
-                        <input type="checkbox" name="param_filter_forTable[]" value="q_prihod_ds_whithNDS" id="14" <? if (in_array('Приход ДС (руб с НДС)', $arResult['DATA_TITLES'])) { echo "checked='true'" ; } ?>>
-                        <label for="14" style="cursor: pointer;">Приход ДС (руб с НДС)</label>
-                    </div>
+
 
 
 
