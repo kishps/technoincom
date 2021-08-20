@@ -1,7 +1,4 @@
 <?php
-if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
-CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amcharts4_maps"));
-?><?php
     if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
     CJSCore::Init(array("jquery2", "amcharts4_theme_animated", "amcharts4", "amcharts4_maps"));
     ?>
