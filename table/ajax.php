@@ -11,6 +11,9 @@ switch ($_REQUEST['action']) {
     case 'getTasks':
         echo json_encode(\CSN\Tasks::getTasks($_REQUEST['filter']));
     break;
+    case 'getUsers':
+        echo json_encode(\CSN\Tasks::getUsers());
+    break;
     default:
         echo json_encode('bad request');
     break;        
