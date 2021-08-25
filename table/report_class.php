@@ -5,6 +5,10 @@ namespace CSN;
 
 class Tasks
 {
+    /**
+     * Получить задачи с запущеным заказом в производство по фильтру
+     * @param array $params ['dateFrom' => '01.01.2021','dateTo' => '31.01.2021','responsible_id' => '1']
+     */
     public static function getTasks($params)
     {
         if (!\CModule::IncludeModule("tasks")) return;
@@ -22,10 +26,10 @@ class Tasks
             );
         }
 
-        $res = CTasks::GetList(
+        $res = \CTasks::GetList(
             array("UF_AUTO_841972304973" => "ASC"),
             $t_arFilter,
-            array('UF_CRM_TASK', 'DESCRIPTION', 'CLOSED_DATE', "TITLE", 'ID','RESPONSIBLE_ID')
+            array('UF_CRM_TASK','CREATED_DATE', 'CLOSED_DATE', "TITLE", 'ID','RESPONSIBLE_ID')
         );
 
         while ($arTask = $res->GetNext()) {
@@ -34,9 +38,17 @@ class Tasks
                     $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
                 }
             }
-            if (self::isProductionStart($arTask['UF_CRM_TASK'])) $arReurn[] = $arTask;
+            if (self::isProductionStart($arTask['UF_CRM_TASK'])) {
+                $arTask['START_PROD'] = true;
+            }
+            if (strlen($arTask['CLOSED_DATE'])>0) {
+                $arTask['COUNT_DAYS'] = date_diff(new \DateTime($arTask['CLOSED_DATE']), new \DateTime($arTask['CREATED_DATE']))->days;
+            } else {
+                $arTask['COUNT_DAYS'] = date_diff(new \DateTime(), new \DateTime($arTask['CREATED_DATE']))->days;
+            }
+            $arReturn[] = $arTask;
         }
-        return $arReurn;
+        return $arReturn;
     }
 
 
