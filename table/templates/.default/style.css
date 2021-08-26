@@ -112,3 +112,7 @@ div.start_prod-stage {
 div.new-stage {
     background-color: rgb(0, 102, 255);
 }
+
+div.not_prod-stage {
+    background-color: rgb(255, 0, 0);
+}

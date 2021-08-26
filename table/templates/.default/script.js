@@ -24,22 +24,17 @@ class Report {
                                         <label class="label" for="dateTo">Интервал до:</label>
                                         <input type="text" onclick="BX.calendar({node: this, field: this, bTime: false});" class="js-filter-input" name="dateTo"  id="dateTo">
                                     </div>
-                                    <div class="filter-item">
+                                    <div class="filter-item" data-filter="closed">
                                         <label class="label" for="dateTo">Закрытые:</label>
-                                        <label class="checkbox-ios">
-                                            <input type="checkbox" class="js-filter-input" name="closed">
-                                            <span class="checkbox-ios-switch"></span>
-                                        </label>
+                 
                                     </div>
-                                    <div class="filter-item">
+                                    <div class="filter-item" data-filter="start_prod">
                                         <label class="label" for="start_prod">Запущен БП производства:</label>
-                                        <label class="checkbox-ios">
-                                            <input type="checkbox" class="js-filter-input" name="start_prod">
-                                            <span class="checkbox-ios-switch"></span>
-                                        </label>
+                                        
                                     </div>
                                     <div class="filter-item" data-filter="user">
                                         <label class="label" for="user-filt">Сотрудник :</label>
+
                                     </div>
                                 </div>`)
             .append(`<table class="table-tasks">
@@ -70,7 +65,8 @@ class Report {
                         </tbody>
                     </table>`);
         $('[data-filter="user"]').append(this.$arrUsersSelect);
-
+        $('[data-filter="start_prod"]').append(this.createSelect('start_prod'));
+        $('[data-filter="closed"]').append(this.createSelect('closed'));
         this.bindInputChange();
 
     }
@@ -83,8 +79,8 @@ class Report {
             let params = {
                 dateFrom: $('input[name="dateFrom"]').val(),
                 dateTo: $('input[name="dateTo"]').val(),
-                closed: $('input[name="closed"]').is(':checked'),
-                start_prod: $('input[name="start_prod"]').is(':checked'),
+                closed: $('select[name="closed"]').val(),
+                start_prod: $('select[name="start_prod"]').val(),
                 responsible_id: $('select[name="user"]').val(),
             }
             console.log("🚀 ~ file: script.js ~ line 59 ~ Report ~ $ ~ params", params)
@@ -113,6 +109,26 @@ class Report {
         this.objUsers = objUsers;
     }
 
+    createSelect(field) {
+
+        let arrOptions = [{
+                value: 'Y',
+                name: 'Да'
+            },
+            {
+                value: 'N',
+                name: 'Нет'
+            },
+        ]
+
+        let $select = $(`<select name="${field}" class="js-filter-input"><option value="">Все</option></select>`);
+
+        for (let option of arrOptions) {
+            $select.append(`<option value="${option.value}">${option.name}</option>`);
+        }
+
+        return $select;
+    }
 
     IsJsonString(str) {
         try {
@@ -175,6 +191,26 @@ class Report {
     }
 
 
+    getStage(params) {
+        let closedDate = params.closedDate;
+        let start_prod = params.start_prod;
+        let stage = {};
+        if (closedDate && start_prod == true) {
+            stage.bar = `<div class="complete-stage"></div><div class="complete-stage"></div><div class="complete-stage"></div>`;
+            stage.title = `Задача закрыта, запущен БП производства`;
+        } else if (closedDate && start_prod == false) {
+            stage.bar = `<div class="not_prod-stage"></div><div class="not_prod-stage"></div><div class="not_prod-stage"></div>`;
+            stage.title = `Задача закрыта, не запущен БП производства`;
+        } else if (start_prod == true) {
+            stage.bar = `<div class="start_prod-stage"></div><div class="start_prod-stage"></div><div class="next-stage"></div>`;
+            stage.title = `Запущен БП производства`;
+        } else {
+            stage.bar = `<div class="new-stage"></div><div class="next-stage"></div><div class="next-stage"></div>`;
+            stage.title = `Новая задача`;
+        }
+        return stage;
+    }
+
     async renderReport() {
         let response = await this.getTasks();
 
@@ -187,29 +223,19 @@ class Report {
         for (let item of data) {
 
             let count_days = (item.COUNT_DAYS) ? `${item.COUNT_DAYS} ${this.num_word(item.COUNT_DAYS, ['день', 'дня', 'дней'])}` : '';
-            let stage = '';
 
-            console.log('item', item);
-
-
-            if (item.CLOSED_DATE && item.START_PROD == true) {
-                stage = `<div class="complete-stage"></div><div class="complete-stage"></div><div class="complete-stage"></div>`;
-            } else if (item.START_PROD == true) {
-                stage = `<div class="start_prod-stage"></div><div class="start_prod-stage"></div><div class="next-stage"></div>`;
-            } else {
-                stage = `<div class="new-stage"></div><div class="next-stage"></div><div class="next-stage"></div>`;
-            }
+            let stage = this.getStage({ closedDate: item.CLOSED_DATE, start_prod: item.START_PROD });
 
             let user = this.objUsers[item.RESPONSIBLE_ID];
-            console.log('user', [this.objUsers[item.RESPONSIBLE_ID], this.objUsers]);
 
+            let userinfoDiv = (user) ? `<div data-user="${item.RESPONSIBLE_ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</div>` : 'Сотрудник не из отдела продаж';
             $("#report .table-tasks tbody").append(`
                 <tr data-task_id="${item.ID}">
                     <td>
                         <a href="/company/personal/user/63/tasks/task/view/${item.ID}/">${item.TITLE}</a>
                     </td>
                     <td>
-                        <div data-user="${item.RESPONSIBLE_ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</div>
+                        ${userinfoDiv}
                     </td>
                     <td>
                         ${item.CREATED_DATE}
@@ -220,8 +246,8 @@ class Report {
                     <td>
                         ${count_days}
                     </td>
-                    <td class="stap-stage">
-                        ${stage}
+                    <td class="stap-stage" title="${stage.title}">
+                        ${stage.bar}
                     </td>
                 </tr>
             `);
