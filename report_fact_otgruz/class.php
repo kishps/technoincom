@@ -366,6 +366,13 @@ class Report extends CBitrixComponent
         $result['SUPPORT']['ALL']['TOTAL_GROUPS'][$params['PRODUCT_GROUP']] = $result['SUPPORT']['ALL']['TOTAL_GROUPS'][$params['PRODUCT_GROUP']] * 1 + $params['SUMM_FOR_DEAL'] * 1;
     } // function
 
+    public static function getValUserField ($valUsEnum) {
+        $ufUsVal = \CUserFieldEnum::GetList(array(), array("ID" => $valUsEnum));
+        while($UsVal = $ufUsVal->GetNext()) {
+            $usFieldXML=$UsVal;
+        }
+        return $usFieldXML['~VALUE'];
+    }
 
     public static function fReport_hlp_AddElement_TOTALS_OWN($params)
     {
@@ -483,7 +490,7 @@ class Report extends CBitrixComponent
                 array('ID' => $arTask['UF_CRM_TASK']),
                 $arGroupBy = false,
                 $arNavStartParams = false,
-                $arSelectFields = array('ASSIGNED_BY_ID')
+                $arSelectFields = array('ASSIGNED_BY_ID','UF_CRM_1512643654')
             );
             $ar = $rsDeal->GetNext();
 
@@ -509,7 +516,8 @@ class Report extends CBitrixComponent
                     'deal_id' => $deal_id,
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
                     //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
-                    'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    //'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    'PRODUCT_GROUP' => self::getValUserField($ar["UF_CRM_1512643654"]),
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
                     'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
@@ -532,7 +540,8 @@ class Report extends CBitrixComponent
                     'deal_id' => $deal_id,
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
                     //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
-                    'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    //'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    'PRODUCT_GROUP' => self::getValUserField($ar["UF_CRM_1512643654"]),
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
                     'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
