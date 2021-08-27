@@ -12,19 +12,22 @@ class Tasks
     public static function getTasks($params)
     {
         if (!\CModule::IncludeModule("tasks")) return 'not IncludeModule("tasks")';
-
+        $arReturn = [];
+        $arReturn['params'] = $params;
+        /*****Фильтры***** */
         $t_arFilter = array(
             "TITLE" => "%ЗАКРЫВАЕМ ЗАДАЧУ ТОЛЬКО ПОСЛЕ ПОЛУЧЕНИЯ ЗАКАЗА ПО РАСЧЕТУ%",
         );
         if ($params['dateFrom']) $t_arFilter['>=CREATED_DATE'] = $params['dateFrom'];
         if ($params['dateTo']) $t_arFilter['<=CREATED_DATE'] = $params['dateTo'];
-        if ($params['responsible_id']) $t_arFilter['RESPONSIBLE_ID'] = $params['responsible_id'];
+        if ($params['responsible_id']) $t_arFilter['RESPONSIBLE_ID'] = $params['user'];
         if ($params['closed'] == 'Y') {
             $t_arFilter['>=STATUS'] = '5';
         } elseif ($params['closed'] == 'N') {
             $t_arFilter['<STATUS'] = '5';
         }
 
+        /****Получение списка *****/
         $res = \CTasks::GetList(
             array("UF_AUTO_841972304973" => "ASC"),
             $t_arFilter,
@@ -34,6 +37,8 @@ class Tasks
         $i = 0;
         $limit = 10000;
 
+
+        /**Обработка******/
         while ($arTask = $res->GetNext()) {
 
             foreach ($arTask['UF_CRM_TASK'] as $crm) {
@@ -41,23 +46,81 @@ class Tasks
                     $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
                 }
             }
-           
+
+
             $arTask['START_PROD'] = self::isProductionStart($arTask['UF_CRM_TASK']);
-            
-/*             if (strlen($arTask['CLOSED_DATE']) > 0) {
-                $arTask['COUNT_DAYS'] = date_diff(new \DateTime($arTask['CLOSED_DATE']), new \DateTime($arTask['CREATED_DATE']))->days;
-            } else {
-                $arTask['COUNT_DAYS'] = date_diff(new \DateTime(), new \DateTime($arTask['CREATED_DATE']))->days;
-            } */
 
-            $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'],$arTask['CREATED_DATE']);
 
+            /**добавление по фильтру */
             if ($params['start_prod'] == 'Y' && $arTask['START_PROD'] == true) {
-                $arReturn[] = $arTask;
+
+                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+                /***Подсчет тоталов */
+                if ($arTask['START_PROD']) {
+                    $arReturn['totals']['start_prod']['Y']++;
+                } else {
+                    $arReturn['totals']['start_prod']['N']++;
+                }
+
+                if ($arTask['CLOSED_DATE'] && $arTask['START_PROD'] == false) {
+                    $arReturn['totals']['closed']['Y']++;
+                    $arReturn['totals']['closed_not_started']++;
+                } elseif ($arTask['CLOSED_DATE']) {
+                    $arReturn['totals']['closed']['Y']++;
+                } else {
+                    $arReturn['totals']['closed']['N']++;
+                }
+
+                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]++;
+                $arReturn['totals']['all']++;
+
+                $arReturn['items'][] = $arTask;
             } elseif ($params['start_prod'] == 'N' && $arTask['START_PROD'] == false) {
-                $arReturn[] = $arTask;
+
+                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+                /***Подсчет тоталов */
+                if ($arTask['START_PROD']) {
+                    $arReturn['totals']['start_prod']['Y']++;
+                } else {
+                    $arReturn['totals']['start_prod']['N']++;
+                }
+
+                if ($arTask['CLOSED_DATE'] && $arTask['START_PROD'] == false) {
+                    $arReturn['totals']['closed']['Y']++;
+                    $arReturn['totals']['closed_not_started']++;
+                } elseif ($arTask['CLOSED_DATE']) {
+                    $arReturn['totals']['closed']['Y']++;
+                } else {
+                    $arReturn['totals']['closed']['N']++;
+                }
+
+                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]++;
+                $arReturn['totals']['all']++;
+
+                $arReturn['items'][] = $arTask;
             } elseif (!$params['start_prod']) {
-                $arReturn[] = $arTask;
+
+                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+                /***Подсчет тоталов */
+                if ($arTask['START_PROD']) {
+                    $arReturn['totals']['start_prod']['Y']++;
+                } else {
+                    $arReturn['totals']['start_prod']['N']++;
+                }
+
+                if ($arTask['CLOSED_DATE'] && $arTask['START_PROD'] == false) {
+                    $arReturn['totals']['closed']['Y']++;
+                    $arReturn['totals']['closed_not_started']++;
+                } elseif ($arTask['CLOSED_DATE']) {
+                    $arReturn['totals']['closed']['Y']++;
+                } else {
+                    $arReturn['totals']['closed']['N']++;
+                }
+
+                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]++;
+                $arReturn['totals']['all']++;
+
+                $arReturn['items'][] = $arTask;
             }
 
 
@@ -68,7 +131,8 @@ class Tasks
         return $arReturn;
     }
 
-    public static function calc_count_days($closed_date, $created_date) {
+    public static function calc_count_days($closed_date, $created_date)
+    {
         if (strlen($closed_date) > 0) {
             return date_diff(new \DateTime($closed_date), new \DateTime($created_date))->days;
         } else {
