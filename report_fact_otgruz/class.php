@@ -19,7 +19,7 @@ class Report extends CBitrixComponent
     private static $arrFilter = [];
     private static $arError = [];
     private static $arDebug = [];
-
+    private static $arGroups = [];
 
     public static function getFromRequest($fieldName)
     {
@@ -110,6 +110,8 @@ class Report extends CBitrixComponent
             return;
         }
         // ### Обработка данных формы )
+
+        self::$arGroups = self::getValUserField(171);
 
         // ### Период (
         $dateFrom = null;
@@ -367,11 +369,17 @@ class Report extends CBitrixComponent
     } // function
 
     public static function getValUserField ($valUsEnum) {
+        $valUsEnum = intval($valUsEnum);
         $ufUsVal = \CUserFieldEnum::GetList(array(), array("ID" => $valUsEnum));
         while($UsVal = $ufUsVal->GetNext()) {
-            $usFieldXML=$UsVal;
+            $usFieldXML=$UsVal['USER_FIELD_ID'];
         }
-        return $usFieldXML['~VALUE'];
+         $valUsEnum1 = $usFieldXML;;
+        $ufUsVal = \CUserFieldEnum::GetList(array(), array("USER_FIELD_ID" => $valUsEnum1));
+        while($UsVal = $ufUsVal->GetNext()) {
+            $usFieldXML1[intval($UsVal['ID'])]=$UsVal['~VALUE'];
+        }
+        return $usFieldXML1; 
     }
 
     public static function fReport_hlp_AddElement_TOTALS_OWN($params)
@@ -485,7 +493,7 @@ class Report extends CBitrixComponent
             }
 
             //узнаем ответственного по сделке, к которой приявязана задача
-            $rsDeal =  CCrmDeal::GetListEx(
+            $rsDeal =  \CCrmDeal::GetListEx(
                 $arOrder = array('CLOSEDATE' => 'asc'),
                 array('ID' => $arTask['UF_CRM_TASK']),
                 $arGroupBy = false,
@@ -493,6 +501,7 @@ class Report extends CBitrixComponent
                 $arSelectFields = array('ASSIGNED_BY_ID','UF_CRM_1512643654')
             );
             $ar = $rsDeal->GetNext();
+
 
 
             //дата закрытия задачи
@@ -509,6 +518,8 @@ class Report extends CBitrixComponent
             //id сделки
             $deal_id = (int) $arTask['UF_CRM_TASK']; // 0 - не указана
 
+            $groupsIds = self::$arGroups;
+
             if ($arTask["UF_AUTO_732134480270"] == 'СОБСТВЕННАЯ') {
                 self::fReport_hlp_AddElement([
                     'result'  => &$result,
@@ -517,7 +528,7 @@ class Report extends CBitrixComponent
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
                     //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
                     //'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
-                    'PRODUCT_GROUP' => self::getValUserField($ar["UF_CRM_1512643654"]),
+                    'PRODUCT_GROUP' => $groupsIds[intval($ar["UF_CRM_1512643654"])],
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
                     'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
@@ -541,7 +552,7 @@ class Report extends CBitrixComponent
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
                     //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
                     //'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
-                    'PRODUCT_GROUP' => self::getValUserField($ar["UF_CRM_1512643654"]),
+                    'PRODUCT_GROUP' => $groupsIds[$ar["UF_CRM_1512643654"]],
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
                     'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
