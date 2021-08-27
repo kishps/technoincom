@@ -645,6 +645,9 @@ class Report extends CBitrixComponent
             //id сделки
             $deal_id = (int) $arTask['UF_CRM_TASK']; // 0 - не указана
 
+
+            $groupsIds = self::$arGroups;
+
             if ($arTask["UF_AUTO_732134480270"] == 'СОБСТВЕННАЯ') {
                 self::fReport_hlp_AddElement([
                     'result'  => &$result,
@@ -652,7 +655,8 @@ class Report extends CBitrixComponent
                     'deal_id' => $deal_id,
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
                     //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
-                    'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    //'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    'PRODUCT_GROUP' => $groupsIds[$ar["UF_CRM_1512643654"]],
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
                     'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
@@ -675,7 +679,8 @@ class Report extends CBitrixComponent
                     'deal_id' => $deal_id,
                     'ASSIGNED_BY_ID' => $ar['ASSIGNED_BY_ID'],
                     //'ASSIGNED_BY_ID' => $arTask["UF_AUTO_841972304973"], //потом расскоментировать
-                    'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    //'PRODUCT_GROUP' => $arTask["UF_AUTO_213360623899"],
+                    'PRODUCT_GROUP' => $groupsIds[$ar["UF_CRM_1512643654"]],
                     'CATEGORY' => $arTask["UF_AUTO_732134480270"],
                     'BP_ID' => $arTask["UF_AUTO_333119548596"],
                     'SUMM_FOR_DEAL' => $arTask["UF_AUTO_779960634145"]*1,
