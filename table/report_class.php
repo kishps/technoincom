@@ -20,13 +20,13 @@ class Tasks
         );
         if ($params['dateFrom']) $t_arFilter['>=CREATED_DATE'] = $params['dateFrom'];
         if ($params['dateTo']) $t_arFilter['<=CREATED_DATE'] = $params['dateTo'];
-        if ($params['responsible_id']) $t_arFilter['RESPONSIBLE_ID'] = $params['user'];
+        if ($params['user']) $t_arFilter['RESPONSIBLE_ID'] = $params['user'];
         if ($params['closed'] == 'Y') {
-            $t_arFilter['>=STATUS'] = '5';
+            $t_arFilter['>=STATUS'] = '4';
         } elseif ($params['closed'] == 'N') {
-            $t_arFilter['<STATUS'] = '5';
+            $t_arFilter['<STATUS'] = '4';
         }
-
+        $arReturn['t_arFilter'] = $t_arFilter;
         /****Получение списка *****/
         $res = \CTasks::GetList(
             array("UF_AUTO_841972304973" => "ASC"),
@@ -46,10 +46,10 @@ class Tasks
                     $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
                 }
             }
-
+            
 
             $arTask['START_PROD'] = self::isProductionStart($arTask['UF_CRM_TASK']);
-
+            
 
             /**добавление по фильтру */
             if ($params['start_prod'] == 'Y' && $arTask['START_PROD'] == true) {
@@ -158,6 +158,7 @@ class Tasks
 
     public static function isProductionStart($deal_id)
     {
+        
         $t_arFilter = [
             'IBLOCK_ID'       => 17,
             'PROPERTY_PRIVYAZKA' => $deal_id,
