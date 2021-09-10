@@ -1135,15 +1135,14 @@ class Report extends CBitrixComponent
 
         while ($ar = $res->fetch()) {
 
-            /*$varvarDUMP = json_encode($ar);
-            echo "<script> console.log(\"ar)\")</script>";
-            echo "<script> console.log({$varvarDUMP})</script>";*/
 
 
 
 
             $deal_id = (int) $ar["PROPERTY_{$params['PROP_DEAL_ID']}_VALUE"]; // 0 - не указана
 
+            //echo "<script> console.log('ar',".json_encode($ar).")</script>";
+         
 
 
             if ($resultKey == 'c_production_summ' || $resultKey == 'g_summ_for_deal' || $resultKey == 'e_planned_shipments') {
@@ -1165,6 +1164,8 @@ class Report extends CBitrixComponent
                     $result[ time ]['detail'][ deal_id ]['h_call_outgoing']['count']
                     $result[ time ]['detail'][ deal_id ]['o_product_testing']['items'][ element_id ]['title']
                 */
+
+                
 
                 $result[$time]['items'][$resultKey]['count']++;
                 $result[$time]['detail'][$deal_id][$resultKey]['count']++;
@@ -1840,9 +1841,11 @@ class Report extends CBitrixComponent
                 'PROP_DEAL_ID' => 'PRIVYAZKA',
             ];
             $params = array_merge($params, $ar);
-
+            
             self::fReport_hlp_get_product_testing_hlp($result, $params);
         }
+        //self::fLog([$result,$params], 'c_production_summ');
+
     } // function 
 
     public static function fReport_hlp_get_orders_shipped_summ(&$result, $params)
@@ -1883,10 +1886,12 @@ class Report extends CBitrixComponent
             //echo "Task name: ".$arTask["TITLE"]."<br>";
             // разбиваем description на <tr>
             $arrTrTableDescriptonTask = explode('[/TR]', $arTask['DESCRIPTION']);
+            //self::fLog($arrTrTableDescriptonTask, '$arrTrTableDescriptonTask');
             foreach ($arrTrTableDescriptonTask as $trItem) {
-                if (strrpos($trItem, 'Стоимость Заказа по Спецификации без НДС') > 0)
+                if (strrpos(mb_strtolower($trItem), mb_strtolower('Стоимость Заказа по Спецификации без НДС')) > 0)
                     $tdItem = explode('[/TD]', $trItem);  //// разбиваем <tr> на <td>
             }
+            //self::fLog($tdItem, '$tdItem');
             $arTask['SUMMA_SDELKI_BEZ_NDS'] = str_replace('[TD]', '', trim($tdItem[1], '|RUB')) * 1;
             foreach ($arTask['UF_CRM_TASK'] as $crm) {
                 if (strrpos($crm, 'D_') === 0) {
