@@ -2,7 +2,9 @@ class Report {
     /**
      * Фильтр вида {dateFrom:'01.07.2021', dateTo:'31.08.2021', closed:true , start_prod:true, user:12}
      */
-    filter = [];
+    filter = {
+        sort: "DESC",
+    };
     $reportContainer = {};
     $arrUsersSelect = [];
     objUsers = [];
@@ -13,10 +15,15 @@ class Report {
         closed: 'Закрытые',
         start_prod: 'Запущен БП производства',
         user: 'Сотрудник',
+        sort: 'Сортировка по дате'
     }
     paramsList = {};
     chartData = []; //данные для графика
     firstDay;
+    objSort = {
+        property: '',
+        sort: ''
+    }
 
     constructor() {
         this.$reportContainer = $('#report');
@@ -34,15 +41,17 @@ class Report {
         await this.createUsersList();
         let filterTitles = this.filterTitles;
 
+        let setDateDiv = this.createSetDateDiv();
         //this.setFilter({ dateFrom: this.firstDay });
 
         this.$reportContainer
             .append(`<div class="filter">
-                                    <div class="filter-item">
+                                    ${setDateDiv}
+                                    <div class="filter-item" style="display:none">
                                         <label class="label" for="dateFrom">${filterTitles.dateFrom}:</label>
                                         <input type="text" onclick="BX.calendar({node: this, field: this, bTime: false});" class="js-filter-input" name="dateFrom" id="dateFrom" >
                                     </div>
-                                    <div class="filter-item dateTo">
+                                    <div class="filter-item dateTo" style="display:none">
                                         <label class="label" for="dateTo">${filterTitles.dateTo}:</label>
                                         <input type="text" onclick="BX.calendar({node: this, field: this, bTime: false});" class="js-filter-input" name="dateTo"  id="dateTo">
                                     </div>
@@ -70,17 +79,20 @@ class Report {
                                 <th>
                                     Ответственный
                                 </th>
-                                <th>
+                                <th class="th_create sortable desc" data-sort="DESC">
                                     Дата создания
                                 </th>
                                 <th>
                                     Дата закрытия
                                 </th>
-                                <th>
+                                <th class="th_count">
                                     Количество дней
                                 </th>
+                                <th >
+                                    Закрыта
+                                </th>
                                 <th>
-                                    Стадия
+                                    Запущен БП производства
                                 </th>
                             </tr>
                         </thead>
@@ -96,22 +108,177 @@ class Report {
 
     }
 
+    createSetDateDiv() {
+        return `<button data-open="select-mounth" class="btn_mounth">Месяц</button>
+        <div class="select select-mounth">
+          <div class="select-mounth-year">
+            <span class="minus">-</span>
+            <span class="mounth-year year">2021</span>
+            <span class="plus">+</span>
+          </div>
+          <div class="select-mounth-mounth">
+            <button data-val="01">Янв.</button>
+            <button data-val="02">Фев.</button>
+            <button data-val="03">Мар.</button>
+            <button data-val="04">Апр.</button>
+            <button data-val="05">Май</button>
+            <button data-val="06">Июнь</button>
+            <button data-val="07">Июль</button>
+            <button data-val="08">Авг.</button>
+            <button data-val="09">Сен.</button>
+            <button data-val="10">Окт.</button>
+            <button data-val="11">Ноя.</button>
+            <button data-val="12">Дек.</button>
+          </div>
+        </div>
+        <button data-open="select-quarter" class="btn_quarter">Квартал</button>
+        <div class="select select-quarter">
+          <div class="select-quarter-year">
+            <span class="minus">-</span>
+            <span class="quarter-year year">2021</span>
+            <span class="plus">+</span>
+          </div>
+          <div class="select-quarter-quarter">
+            <button data-val="1">I</button>
+            <button data-val="4">II</button>
+            <button data-val="7">III</button>
+            <button data-val="10">IV</button>
+          </div>
+        </div>
+        <button data-open="select-year" class="btn_year">Год</button>
+        <div class="select select-year">
+          <div class="select-year">
+            <span class="minus">-</span>
+            <span class="year-year year">2021</span>
+            <span class="plus">+</span>
+          </div>
+          <button class="set-year">Выбрать</button>
+        </div>`;
+    }
+
+    startRender() {
+        let params = {
+            dateFrom: $('input[name="dateFrom"]').val(),
+            dateTo: $('input[name="dateTo"]').val(),
+            closed: $('select[name="closed"]').val(),
+            start_prod: $('select[name="start_prod"]').val(),
+            user: $('select[name="user"]').val(),
+            sort: $('.th_create').data('sort'),
+        }
+        console.log("🚀 ~ file: script.js ~ line 59 ~ Report ~ $ ~ params", params)
+
+        this.setFilter(params);
+        this.renderReport();
+    }
+
+
     bindInputChange() {
         let This = this;
         $('.js-filter-input').on('change', function() {
 
+            This.startRender();
 
-            let params = {
-                dateFrom: $('input[name="dateFrom"]').val(),
-                dateTo: $('input[name="dateTo"]').val(),
-                closed: $('select[name="closed"]').val(),
-                start_prod: $('select[name="start_prod"]').val(),
-                user: $('select[name="user"]').val(),
+        });
+
+
+        $("button[data-open]").click(function() {
+            let open = $(this).data("open");
+            $("." + open).addClass("active");
+            $("button[data-open]").removeClass("active-btn");
+        });
+
+        $(".select-mounth-mounth button").click(function() {
+            let m = $(this).data("val") - 1,
+                y = $(".mounth-year").text(),
+                firstDayTMP = new Date(y, m, 1),
+                lastDayTMP = new Date(y, m + 1, 0);
+
+            $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
+            $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
+
+
+            $(".btn_mounth")
+                .text(`${$(this).text()} ${y}`)
+                .addClass("active-btn");
+            $(".select").removeClass("active");
+
+            This.startRender();
+        });
+
+        $(".select-quarter-quarter button").click(function() {
+            let m = $(this).data("val") - 1,
+                y = $(".quarter-year").text(),
+                firstDayTMP = new Date(y, m, 1),
+                lastDayTMP = new Date(y, m + 4, 0);
+
+            $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
+            $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
+
+            $(".btn_quarter")
+                .text(`${$(this).text()} квартал ${y}`)
+                .addClass("active-btn");
+            $(".select").removeClass("active");
+
+            This.startRender();
+        });
+
+        $(".set-year").click(function() {
+            let m = 0,
+                y = $(".year-year").text(),
+                firstDayTMP = new Date(y, m, 1),
+                lastDayTMP = new Date(y, m + 12, 0);
+
+            $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
+            $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
+
+            $(".btn_year").text(`${y}`).addClass("active-btn");
+            $(".select").removeClass("active");
+
+            This.startRender();
+        });
+
+        $(".plus").click(function() {
+            let $year = $(this).siblings(".year");
+            $year.text(parseInt($year.text()) + 1);
+        });
+
+        $(".minus").click(function() {
+            let $year = $(this).siblings(".year");
+            $year.text(parseInt($year.text()) - 1);
+        });
+
+
+        $('.th_create').click(function() {
+            $('th').removeClass('sortable');
+            if ($(this).hasClass('desc')) {
+                $(this).removeClass('desc').addClass('asc');
+                $(this).data('sort', 'ASC');
+            } else {
+                $(this).removeClass('asc').addClass('desc');
+                $(this).data('sort', 'DESC');
             }
-            console.log("🚀 ~ file: script.js ~ line 59 ~ Report ~ $ ~ params", params)
+            $(this).addClass('sortable');
+            This.objSort = {};
+            if ($(this).data('sort')) This.startRender();
+        });
 
-            This.setFilter(params);
-            This.renderReport();
+        $('.th_count').click(function() {
+            $('th').removeClass('sortable');
+            if ($(this).hasClass('desc')) {
+                $(this).removeClass('desc').addClass('asc');
+                This.objSort = {
+                    property: 'COUNT_DAYS',
+                    sort: 'asc'
+                }
+            } else {
+                $(this).removeClass('asc').addClass('desc');
+                This.objSort = {
+                    property: 'COUNT_DAYS',
+                    sort: 'desc'
+                }
+            }
+            $(this).addClass('sortable');
+            This.startRender();
         });
 
     }
@@ -281,6 +448,10 @@ class Report {
     createTable() {
         let items = this.data.items;
 
+        if (this.objSort.property && this.objSort.sort) {
+            items = this.sortArrayObjects(items, this.objSort.property, this.objSort.sort)
+        }
+
         if (!this.IsIterrable(items)) {
             $("#report .table-tasks tbody").html('');
             $("#report .params-list").html('');
@@ -290,9 +461,9 @@ class Report {
         $("#report .table-tasks tbody").html('');
         for (let item of items) {
 
-            let count_days = (item.COUNT_DAYS) ? `${item.COUNT_DAYS} ${this.num_word(item.COUNT_DAYS, ['день', 'дня', 'дней'])}` : '';
+            let count_days = (item.COUNT_DAYS) ? `${item.COUNT_DAYS} ${this.num_word(item.COUNT_DAYS, ['день', 'дня', 'дней'])}` : '0 дней';
 
-            let stage = this.getStage({ closedDate: item.CLOSED_DATE, start_prod: item.START_PROD });
+            //let stage = this.getStage({ closedDate: item.CLOSED_DATE, start_prod: item.START_PROD });
 
             let user = this.objUsers[item.RESPONSIBLE_ID];
 
@@ -314,8 +485,11 @@ class Report {
                     <td>
                         ${count_days}
                     </td>
-                    <td class="stap-stage" title="${stage.title}">
-                        ${stage.bar}
+                    <td>
+                        ${(item.CLOSED_DATE) ? 'Да' : "Нет"}
+                    </td>
+                    <td>
+                        ${(item.START_PROD) ? 'Да' : "Нет"}
                     </td>
                 </tr>
             `);
@@ -327,10 +501,10 @@ class Report {
         let filterTitles = this.filterTitles;
         let paramsList = {};
 
-        let values = { "Y": "Да", "N": 'Нет' };
+        let values = { "Y": "Да", "N": 'Нет', "DESC": 'Новые', "ASC": 'Старые' };
 
         for (let param_code in params) {
-            if (params[param_code] == "Y" || params[param_code] == "N") params[param_code] = values[params[param_code]]
+            if (params[param_code] == "Y" || params[param_code] == "N" || params[param_code] == "DESC" || params[param_code] == "ASC") params[param_code] = values[params[param_code]]
             if (params[param_code]) paramsList[param_code] = {
                 title: filterTitles[param_code],
                 value: params[param_code]
@@ -342,6 +516,7 @@ class Report {
     }
 
     renderParamsList(paramsList) {
+        console.log('paramsList', paramsList);
         $('.params-list').html('').append(`<table class="params-table">
                                     <tbody>
                                     </tbody>
@@ -372,6 +547,36 @@ class Report {
         this.createTotals();
 
         this.createChart();
+    }
+
+    sortArrayObjects(arSortable, sortableProperty, sort = 'asc') {
+        return arSortable.sort(function(a, b) {
+            if (sortableProperty == 'CREATED_DATE') {
+                let aa = new Date(a[sortableProperty]);
+                let bb = new Date(b[sortableProperty]);
+                if (aa > bb) {
+                    return (sort == 'asc') ? 1 : -1;
+                }
+                if (aa < bb) {
+                    return (sort == 'asc') ? -1 : 1;
+                }
+                // a должно быть равным b
+                return 0;
+            } else {
+                a[sortableProperty] = (a[sortableProperty]) ? a[sortableProperty] : 0;
+                b[sortableProperty] = (b[sortableProperty]) ? b[sortableProperty] : 0;
+                if (a[sortableProperty] > b[sortableProperty]) {
+                    return (sort == 'asc') ? 1 : -1;
+                }
+                if (a[sortableProperty] < b[sortableProperty]) {
+                    return (sort == 'asc') ? -1 : 1;
+                }
+                // a должно быть равным b
+                return 0;
+            }
+
+
+        });
     }
 
     createChart() {
@@ -415,6 +620,11 @@ class Report {
             series.tooltip.pointerOrientation = "vertical";
             series.tooltip.dy = -6;
             series.columnsContainer.zIndex = 100;
+
+            var labelBullet = series.bullets.push(new am4charts.LabelBullet());
+            labelBullet.label.verticalCenter = "bottom";
+            labelBullet.label.dy = -10;
+            labelBullet.label.text = "{values.valueY.workingValue.formatNumber('#.')}";
 
             var columnTemplate = series.columns.template;
             columnTemplate.width = am4core.percent(50);

@@ -26,10 +26,11 @@ class Tasks
         } elseif ($params['closed'] == 'N') {
             $t_arFilter['<STATUS'] = '4';
         }
+        $sort = ($params['sort'])?$params['sort']:'ASC';
         $arReturn['t_arFilter'] = $t_arFilter;
         /****Получение списка *****/
         $res = \CTasks::GetList(
-            array("UF_AUTO_841972304973" => "ASC"),
+            array("CREATED_DATE" => $sort),
             $t_arFilter,
             array('UF_CRM_TASK', 'CREATED_DATE', 'CLOSED_DATE', "TITLE", 'ID', 'RESPONSIBLE_ID')
         );
