@@ -21,6 +21,7 @@ class Tasks
         if ($params['dateFrom']) $t_arFilter['>=CREATED_DATE'] = $params['dateFrom'];
         if ($params['dateTo']) $t_arFilter['<=CREATED_DATE'] = $params['dateTo'];
         if ($params['user']) $t_arFilter['RESPONSIBLE_ID'] = $params['user'];
+        if ($params['deal_success']) $t_arFilter['UF_AUTO_691625133653'] = $params['deal_success'];
         if ($params['closed'] == 'Y') {
             $t_arFilter['>=STATUS'] = '4';
         } elseif ($params['closed'] == 'N') {
@@ -32,7 +33,7 @@ class Tasks
         $res = \CTasks::GetList(
             array("CREATED_DATE" => $sort),
             $t_arFilter,
-            array('UF_CRM_TASK', 'CREATED_DATE', 'CLOSED_DATE', "TITLE", 'ID', 'RESPONSIBLE_ID')
+            array('UF_CRM_TASK', 'CREATED_DATE', 'CLOSED_DATE', "TITLE", 'ID', 'RESPONSIBLE_ID','UF_AUTO_691625133653')
         );
 
         $i = 0;

@@ -16,7 +16,8 @@ class Report {
         start_prod: 'Запущен БП производства',
         user: 'Сотрудник',
         sort: 'Сортировка по дате',
-        after30: 'Больше 30 дней'
+        after30: 'Больше 30 дней',
+        deal_success: 'Сделка успешна'
     }
     paramsList = {};
     chartData = []; //данные для графика
@@ -68,6 +69,10 @@ class Report {
                                     <label class="label" for="after30">${filterTitles.after30}:</label>
                                     
                                     </div>
+                                    <div class="filter-item" data-filter="deal_success">
+                                    <label class="label" for="deal_success">${filterTitles.deal_success}:</label>
+                                    
+                                    </div>
                                     <div class="filter-item" data-filter="user">
                                         <label class="label" for="user">${filterTitles.user}:</label>
 
@@ -99,6 +104,9 @@ class Report {
                                 <th>
                                     Запущен БП производства
                                 </th>
+                                <th>
+                                    Сделка успешна
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -109,6 +117,7 @@ class Report {
         $('[data-filter="start_prod"]').append(this.createSelect('start_prod'));
         $('[data-filter="closed"]').append(this.createSelect('closed'));
         $('[data-filter="after30"]').append(this.createSelect('after30'));
+        $('[data-filter="deal_success"]').append(this.createSelect('deal_success'));
         this.bindInputChange();
         this.renderReport();
 
@@ -171,6 +180,7 @@ class Report {
             user: $('select[name="user"]').val(),
             sort: $('.th_create').data('sort'),
             after30: $('select[name="after30"]').val(),
+            deal_success: $('select[name="deal_success"]').val(),
         }
         console.log("🚀 ~ file: script.js ~ line 59 ~ Report ~ $ ~ params", params)
 
@@ -489,6 +499,10 @@ class Report {
 
             let user = this.objUsers[item.RESPONSIBLE_ID];
 
+            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'Y')? 'Да' : item.UF_AUTO_691625133653;
+            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'N')? 'Нет' : item.UF_AUTO_691625133653;
+            
+
             let userinfoDiv = (user) ? `<div data-user="${item.RESPONSIBLE_ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</div>` : 'Сотрудник не из отдела продаж';
             $("#report .table-tasks tbody").append(`
                 <tr data-task_id="${item.ID}">
@@ -513,6 +527,10 @@ class Report {
                     <td>
                         ${(item.START_PROD) ? 'Да' : "Нет"}
                     </td>
+                    <td>
+                        ${(item.UF_AUTO_691625133653) ? item.UF_AUTO_691625133653 : ""}
+                    </td>
+
                 </tr>
             `);
         }
