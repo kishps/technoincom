@@ -51,11 +51,16 @@ class Tasks
 
             $arTask['START_PROD'] = self::isProductionStart($arTask['UF_CRM_TASK']);
             
+            $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+            if ($params['after30']) {
+                if (!($params['after30'] == 'Y' && $arTask['COUNT_DAYS']>30 || $params['after30'] == 'N' && $arTask['COUNT_DAYS']<=30) ) continue;
+            }
+           
 
             /**добавление по фильтру */
             if ($params['start_prod'] == 'Y' && $arTask['START_PROD'] == true) {
 
-                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+               
                 /***Подсчет тоталов */
                 if ($arTask['START_PROD']) {
                     $arReturn['totals']['start_prod']['Y']++;
@@ -78,7 +83,7 @@ class Tasks
                 $arReturn['items'][] = $arTask;
             } elseif ($params['start_prod'] == 'N' && $arTask['START_PROD'] == false) {
 
-                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+                
                 /***Подсчет тоталов */
                 if ($arTask['START_PROD']) {
                     $arReturn['totals']['start_prod']['Y']++;
@@ -101,7 +106,7 @@ class Tasks
                 $arReturn['items'][] = $arTask;
             } elseif (!$params['start_prod']) {
 
-                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+                
                 /***Подсчет тоталов */
                 if ($arTask['START_PROD']) {
                     $arReturn['totals']['start_prod']['Y']++;

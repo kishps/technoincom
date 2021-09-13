@@ -15,7 +15,8 @@ class Report {
         closed: 'Закрытые',
         start_prod: 'Запущен БП производства',
         user: 'Сотрудник',
-        sort: 'Сортировка по дате'
+        sort: 'Сортировка по дате',
+        after30: 'Больше 30 дней'
     }
     paramsList = {};
     chartData = []; //данные для графика
@@ -63,6 +64,10 @@ class Report {
                                         <label class="label" for="start_prod">${filterTitles.start_prod}:</label>
                                         
                                     </div>
+                                    <div class="filter-item" data-filter="after30">
+                                    <label class="label" for="after30">${filterTitles.after30}:</label>
+                                    
+                                    </div>
                                     <div class="filter-item" data-filter="user">
                                         <label class="label" for="user">${filterTitles.user}:</label>
 
@@ -103,6 +108,7 @@ class Report {
         $('[data-filter="user"]').append(this.$arrUsersSelect);
         $('[data-filter="start_prod"]').append(this.createSelect('start_prod'));
         $('[data-filter="closed"]').append(this.createSelect('closed'));
+        $('[data-filter="after30"]').append(this.createSelect('after30'));
         this.bindInputChange();
         this.renderReport();
 
@@ -164,6 +170,7 @@ class Report {
             start_prod: $('select[name="start_prod"]').val(),
             user: $('select[name="user"]').val(),
             sort: $('.th_create').data('sort'),
+            after30: $('select[name="after30"]').val(),
         }
         console.log("🚀 ~ file: script.js ~ line 59 ~ Report ~ $ ~ params", params)
 
