@@ -352,14 +352,11 @@ div.complete-stage {
 #report .filter button:hover {
 	opacity: .7;
 }
-.th_create.sortable, .th_count {
-	cursor: pointer;
-	position: relative;
-}
-.th_create.sortable:hover, .th_count:hover {
+
+.th_create:hover, .th_count:hover {
 	background: #9bbcf1 !important;
 }
-.th_create.sortable.asc:before, .th_count:before {
+.th_create.sortable.asc:before, .th_count.asc.sortable:before {
     content: ''; 
     position: absolute; 
     right: 10px; top: calc(50% - 5px); 
@@ -380,6 +377,10 @@ div.complete-stage {
 }
 #report .filter {
 	width: 395px;
+}
+#report .active-btn {
+	background: #96da07 !important;
+	border-color: #96da07 !important;
 }
 .select-mounth-year .minus, .select-mounth-year .plus,
 .select-quarter-year .minus, .select-quarter-year .plus,
@@ -448,4 +449,9 @@ font-size: 20px;
 	flex-basis: calc(33.3333% - 3px);
 	max-width: calc(33.3333% - 3px);
 	width: 100%;
+}
+.th_create, .th_count {
+	cursor: pointer;
+	position: relative;
+	padding-right: 25px !important;
 }

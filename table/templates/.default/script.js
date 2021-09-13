@@ -178,6 +178,13 @@ class Report {
         this.renderReport();
     }
 
+    defaultButtons() {
+        $("button[data-open]").each(function() {
+            if ($(this).data("open") == 'select-mounth') $(this).text('Месяц');
+            if ($(this).data("open") == 'select-quarter') $(this).text('Квартал');
+            if ($(this).data("open") == 'select-year') $(this).text('Год');
+        });
+    }
 
     bindInputChange() {
         let This = this;
@@ -190,6 +197,7 @@ class Report {
 
         $("button[data-open]").click(function() {
             let open = $(this).data("open");
+            $('.filter .select').removeClass('active');
             $("." + open).addClass("active");
             $("button[data-open]").removeClass("active-btn");
         });
@@ -203,11 +211,14 @@ class Report {
             $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
             $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
 
+            This.defaultButtons();
 
             $(".btn_mounth")
                 .text(`${$(this).text()} ${y}`)
                 .addClass("active-btn");
             $(".select").removeClass("active");
+
+
 
             This.startRender();
         });
@@ -220,6 +231,8 @@ class Report {
 
             $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
             $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
+
+            This.defaultButtons();
 
             $(".btn_quarter")
                 .text(`${$(this).text()} квартал ${y}`)
@@ -237,6 +250,8 @@ class Report {
 
             $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
             $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
+
+            This.defaultButtons();
 
             $(".btn_year").text(`${y}`).addClass("active-btn");
             $(".select").removeClass("active");
@@ -601,7 +616,7 @@ class Report {
             var chart = am4core.create("chartdiv", am4charts.XYChart);
             chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
 
-            chart.paddingBottom = 30;
+            chart.paddingBottom = 0;
 
             chart.data = This.chartData;
 
