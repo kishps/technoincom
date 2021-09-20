@@ -440,11 +440,11 @@ class Report {
         let objUsers = this.objUsers;
         let usersTotal = this.data.totals.users;
         let totals = this.data.totals;
-        
+
         for (let user_id in usersTotal) {
-            
+
             if (!objUsers[user_id]) continue;
-            let kpd = usersTotal[user_id]['start_prod']/usersTotal[user_id]['closed']*100;
+            let kpd = usersTotal[user_id]['start_prod'] / usersTotal[user_id]['closed'] * 100;
             chartdata.push({
                 "name": `${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}`,
                 'steps': kpd,
@@ -504,9 +504,9 @@ class Report {
 
             let user = this.objUsers[item.RESPONSIBLE_ID];
 
-            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'Y')? 'Да' : item.UF_AUTO_691625133653;
-            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'N')? 'Нет' : item.UF_AUTO_691625133653;
-            
+            item.UF_AUTO_691625133653 = (item.UF_AUTO_691625133653 == 'Y') ? 'Да' : item.UF_AUTO_691625133653;
+            item.UF_AUTO_691625133653 = (item.UF_AUTO_691625133653 == 'N') ? 'Нет' : item.UF_AUTO_691625133653;
+
 
             let userinfoDiv = (user) ? `<div data-user="${item.RESPONSIBLE_ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</div>` : 'Сотрудник не из отдела продаж';
             $("#report .table-tasks tbody").append(`
