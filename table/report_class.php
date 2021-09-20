@@ -21,6 +21,7 @@ class Tasks
         if ($params['dateFrom']) $t_arFilter['>=CREATED_DATE'] = $params['dateFrom'];
         if ($params['dateTo']) $t_arFilter['<=CREATED_DATE'] = $params['dateTo'];
         if ($params['user']) $t_arFilter['RESPONSIBLE_ID'] = $params['user'];
+        if ($params['deal_success']) $t_arFilter['UF_AUTO_691625133653'] = $params['deal_success'];
         if ($params['closed'] == 'Y') {
             $t_arFilter['>=STATUS'] = '4';
         } elseif ($params['closed'] == 'N') {
@@ -32,7 +33,7 @@ class Tasks
         $res = \CTasks::GetList(
             array("CREATED_DATE" => $sort),
             $t_arFilter,
-            array('UF_CRM_TASK', 'CREATED_DATE', 'CLOSED_DATE', "TITLE", 'ID', 'RESPONSIBLE_ID')
+            array('UF_CRM_TASK', 'CREATED_DATE', 'CLOSED_DATE', "TITLE", 'ID', 'RESPONSIBLE_ID','UF_AUTO_691625133653')
         );
 
         $i = 0;
@@ -51,14 +52,24 @@ class Tasks
 
             $arTask['START_PROD'] = self::isProductionStart($arTask['UF_CRM_TASK']);
             
+            $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+            if ($params['after30']) {
+                if (!($params['after30'] == 'Y' && $arTask['COUNT_DAYS']>30 || $params['after30'] == 'N' && $arTask['COUNT_DAYS']<=30) ) continue;
+            }
+           
+            if (!$arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['start_prod']) $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['start_prod'] = 0;
 
             /**добавление по фильтру */
             if ($params['start_prod'] == 'Y' && $arTask['START_PROD'] == true) {
 
-                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+                
+                if ($arTask['CLOSED_DATE'])  $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['closed']++;
+    
+    
                 /***Подсчет тоталов */
                 if ($arTask['START_PROD']) {
                     $arReturn['totals']['start_prod']['Y']++;
+                    $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['start_prod']++;
                 } else {
                     $arReturn['totals']['start_prod']['N']++;
                 }
@@ -72,16 +83,24 @@ class Tasks
                     $arReturn['totals']['closed']['N']++;
                 }
 
-                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]++;
+
+
+
+                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['all']++;
                 $arReturn['totals']['all']++;
 
                 $arReturn['items'][] = $arTask;
             } elseif ($params['start_prod'] == 'N' && $arTask['START_PROD'] == false) {
 
-                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+                
+                
+                if ($arTask['CLOSED_DATE'])  $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['closed']++;
+    
+    
                 /***Подсчет тоталов */
                 if ($arTask['START_PROD']) {
                     $arReturn['totals']['start_prod']['Y']++;
+                    $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['start_prod']++;
                 } else {
                     $arReturn['totals']['start_prod']['N']++;
                 }
@@ -95,16 +114,22 @@ class Tasks
                     $arReturn['totals']['closed']['N']++;
                 }
 
-                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]++;
+                
+                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['all']++;
                 $arReturn['totals']['all']++;
 
                 $arReturn['items'][] = $arTask;
             } elseif (!$params['start_prod']) {
 
-                $arTask['COUNT_DAYS'] = self::calc_count_days($arTask['CLOSED_DATE'], $arTask['CREATED_DATE']);
+
+                if ($arTask['CLOSED_DATE'])  $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['closed']++;
+    
+    
+                
                 /***Подсчет тоталов */
                 if ($arTask['START_PROD']) {
                     $arReturn['totals']['start_prod']['Y']++;
+                    $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['start_prod']++;
                 } else {
                     $arReturn['totals']['start_prod']['N']++;
                 }
@@ -118,7 +143,8 @@ class Tasks
                     $arReturn['totals']['closed']['N']++;
                 }
 
-                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]++;
+               
+                $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['all']++;
                 $arReturn['totals']['all']++;
 
                 $arReturn['items'][] = $arTask;
@@ -129,6 +155,7 @@ class Tasks
             if ($i >= $limit) return $arReturn;
             $i++;
         }
+        
         return $arReturn;
     }
 

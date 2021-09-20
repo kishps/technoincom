@@ -12,10 +12,12 @@ class Report {
     filterTitles = {
         dateFrom: 'Интервал от',
         dateTo: 'Интервал до',
-        closed: 'Закрытые',
+        closed: 'Закрыта "Получить заказ по расчету"',
         start_prod: 'Запущен БП производства',
         user: 'Сотрудник',
-        sort: 'Сортировка по дате'
+        sort: 'Сортировка по дате',
+        after30: 'Больше 30 дней',
+        deal_success: 'Завершено с производством'
     }
     paramsList = {};
     chartData = []; //данные для графика
@@ -63,7 +65,15 @@ class Report {
                                         <label class="label" for="start_prod">${filterTitles.start_prod}:</label>
                                         
                                     </div>
-                                    <div class="filter-item" data-filter="user">
+                                    <div class="filter-item" data-filter="after30">
+                                    <label class="label" for="after30">${filterTitles.after30}:</label>
+                                    
+                                    </div>
+                                    <div class="filter-item" data-filter="deal_success">
+                                    <label class="label" for="deal_success">${filterTitles.deal_success}:</label>
+                                    
+                                    </div>
+                                                                        <div class="filter-item" data-filter="user">
                                         <label class="label" for="user">${filterTitles.user}:</label>
 
                                     </div>
@@ -94,6 +104,9 @@ class Report {
                                 <th>
                                     Запущен БП производства
                                 </th>
+                                <th>
+                                    Завершено с производством
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,6 +116,8 @@ class Report {
         $('[data-filter="user"]').append(this.$arrUsersSelect);
         $('[data-filter="start_prod"]').append(this.createSelect('start_prod'));
         $('[data-filter="closed"]').append(this.createSelect('closed'));
+        $('[data-filter="after30"]').append(this.createSelect('after30'));
+        $('[data-filter="deal_success"]').append(this.createSelect('deal_success'));
         this.bindInputChange();
         this.renderReport();
 
@@ -164,6 +179,8 @@ class Report {
             start_prod: $('select[name="start_prod"]').val(),
             user: $('select[name="user"]').val(),
             sort: $('.th_create').data('sort'),
+            after30: $('select[name="after30"]').val(),
+            deal_success: $('select[name="deal_success"]').val(),
         }
         console.log("🚀 ~ file: script.js ~ line 59 ~ Report ~ $ ~ params", params)
 
@@ -171,6 +188,13 @@ class Report {
         this.renderReport();
     }
 
+    defaultButtons() {
+        $("button[data-open]").each(function() {
+            if ($(this).data("open") == 'select-mounth') $(this).text('Месяц');
+            if ($(this).data("open") == 'select-quarter') $(this).text('Квартал');
+            if ($(this).data("open") == 'select-year') $(this).text('Год');
+        });
+    }
 
     bindInputChange() {
         let This = this;
@@ -183,6 +207,7 @@ class Report {
 
         $("button[data-open]").click(function() {
             let open = $(this).data("open");
+            $('.filter .select').removeClass('active');
             $("." + open).addClass("active");
             $("button[data-open]").removeClass("active-btn");
         });
@@ -196,11 +221,14 @@ class Report {
             $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
             $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
 
+            This.defaultButtons();
 
             $(".btn_mounth")
                 .text(`${$(this).text()} ${y}`)
                 .addClass("active-btn");
             $(".select").removeClass("active");
+
+
 
             This.startRender();
         });
@@ -209,10 +237,12 @@ class Report {
             let m = $(this).data("val") - 1,
                 y = $(".quarter-year").text(),
                 firstDayTMP = new Date(y, m, 1),
-                lastDayTMP = new Date(y, m + 4, 0);
+                lastDayTMP = new Date(y, m + 3, 0);
 
             $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
             $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
+
+            This.defaultButtons();
 
             $(".btn_quarter")
                 .text(`${$(this).text()} квартал ${y}`)
@@ -230,6 +260,8 @@ class Report {
 
             $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
             $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
+
+            This.defaultButtons();
 
             $(".btn_year").text(`${y}`).addClass("active-btn");
             $(".select").removeClass("active");
@@ -408,12 +440,14 @@ class Report {
         let objUsers = this.objUsers;
         let usersTotal = this.data.totals.users;
         let totals = this.data.totals;
-
+        
         for (let user_id in usersTotal) {
+            
             if (!objUsers[user_id]) continue;
+            let kpd = usersTotal[user_id]['start_prod']/usersTotal[user_id]['closed']*100;
             chartdata.push({
                 "name": `${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}`,
-                'steps': usersTotal[user_id],
+                'steps': kpd,
                 "href": objUsers[user_id].PHOTO.src
             });
         }
@@ -439,6 +473,9 @@ class Report {
                                 </tr>
                                 <tr>
                                 <td>Среднее время продолжительности задачи (дн.)</td><td>${(totals.meanDays) ? totals.meanDays.toFixed(2) : ''}</td>
+                                </tr>
+                                <tr>
+                                <td>Эффективность в %</td><td>${(totals.start_prod.Y && totals.closed.Y) ? (totals.start_prod.Y/totals.closed.Y*100).toFixed(2) : ''}</td>
                                 </tr>
                                 `);
 
@@ -467,6 +504,10 @@ class Report {
 
             let user = this.objUsers[item.RESPONSIBLE_ID];
 
+            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'Y')? 'Да' : item.UF_AUTO_691625133653;
+            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'N')? 'Нет' : item.UF_AUTO_691625133653;
+            
+
             let userinfoDiv = (user) ? `<div data-user="${item.RESPONSIBLE_ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</div>` : 'Сотрудник не из отдела продаж';
             $("#report .table-tasks tbody").append(`
                 <tr data-task_id="${item.ID}">
@@ -491,6 +532,10 @@ class Report {
                     <td>
                         ${(item.START_PROD) ? 'Да' : "Нет"}
                     </td>
+                    <td>
+                        ${(item.UF_AUTO_691625133653) ? item.UF_AUTO_691625133653 : ""}
+                    </td>
+
                 </tr>
             `);
         }
@@ -594,7 +639,9 @@ class Report {
             var chart = am4core.create("chartdiv", am4charts.XYChart);
             chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
 
-            chart.paddingBottom = 30;
+            chart.paddingBottom = 0;
+            chart.paddingTop = 30;
+            chart.marginTop = 30;
 
             chart.data = This.chartData;
 
@@ -623,7 +670,7 @@ class Report {
 
             var labelBullet = series.bullets.push(new am4charts.LabelBullet());
             labelBullet.label.verticalCenter = "bottom";
-            labelBullet.label.dy = -10;
+            labelBullet.label.dy = 4;
             labelBullet.label.text = "{values.valueY.workingValue.formatNumber('#.')}";
 
             var columnTemplate = series.columns.template;
@@ -670,7 +717,7 @@ class Report {
             })
 
             var previousBullet;
-            chart.cursor.events.on("cursorpositionchanged", function(event) {
+            /*chart.cursor.events.on("cursorpositionchanged", function(event) {
                 var dataItem = series.tooltipDataItem;
 
                 if (dataItem.column) {
@@ -689,7 +736,7 @@ class Report {
                         previousBullet = bullet;
                     }
                 }
-            })
+            })*/
 
         }); // end am4core.ready()
     }
