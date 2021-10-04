@@ -19,6 +19,7 @@ class Report {
     }
     paramsList = {};
     chartData = []; //данные для графика
+    chartDataPie = []; //данные для графика
     firstDay;
     objSort = {
         property: '',
@@ -45,7 +46,8 @@ class Report {
         //this.setFilter({ dateFrom: this.firstDay });
 
         this.$reportContainer
-            .append(`<div class="filter">
+            .append(`   <div class="left-side">
+                                <div class="filter">
                                     ${setDateDiv}
                                     <div class="filter-item" style="display:none">
                                         <label class="label" for="dateFrom">${filterTitles.dateFrom}:</label>
@@ -56,19 +58,19 @@ class Report {
                                         <input type="text" onclick="BX.calendar({node: this, field: this, bTime: false});" class="js-filter-input" name="dateTo"  id="dateTo">
                                     </div>
                                         
-                                    </div>
+                                </div>
+                                <div>
                                     <div class="filter-item" data-filter="after30">
-                                    <label class="label" for="after30">${filterTitles.after30}:</label>
-                                    
-                                    
+                                        <label class="label" for="after30">${filterTitles.after30}:</label>
                                     </div>
-                                                                        <div class="filter-item" data-filter="user">
+                                    <div class="filter-item" data-filter="user">
                                         <label class="label" for="user">${filterTitles.user}:</label>
-
                                     </div>
-                                </div>`)
-            .append(`<div class="params-list"><div>`)
-            .append(`<div class="totals"><table class="totals-table"><tbody></tbody></table><div id="chartdiv"></div><div>`)
+                                </div>
+                                <div class="params-list"></div>
+                                <div class="totals"><table class="totals-table"><tbody></tbody></table></div>
+                        </div>`)
+            .append(`<div class="charts"><div id="chartdiv_pie"></div><div id="chartdiv"></div></div>`)
             .append(`<table class="table-tasks">
                         <thead>
                             <tr>
@@ -99,56 +101,65 @@ class Report {
         $('[data-filter="after30"]').append(this.createSelect('after30'));
 
         this.bindInputChange();
-        this.renderReport();
+
+        let nowDate = new Date();
+        let year = nowDate.getFullYear();
+        let month = nowDate.getMonth() * 1 + 1;
+        $('.mounth-year').text(year);
+        $(`.select-mounth-mounth button[data-val="${month}"]`).click();
+
+        //this.renderReport();
 
     }
 
     createSetDateDiv() {
-        return `<button data-open="select-mounth" class="btn_mounth">Месяц</button>
-        <div class="select select-mounth">
-          <div class="select-mounth-year">
-            <span class="minus">-</span>
-            <span class="mounth-year year">2021</span>
-            <span class="plus">+</span>
-          </div>
-          <div class="select-mounth-mounth">
-            <button data-val="01">Янв.</button>
-            <button data-val="02">Фев.</button>
-            <button data-val="03">Мар.</button>
-            <button data-val="04">Апр.</button>
-            <button data-val="05">Май</button>
-            <button data-val="06">Июнь</button>
-            <button data-val="07">Июль</button>
-            <button data-val="08">Авг.</button>
-            <button data-val="09">Сен.</button>
-            <button data-val="10">Окт.</button>
-            <button data-val="11">Ноя.</button>
-            <button data-val="12">Дек.</button>
-          </div>
-        </div>
-        <button data-open="select-quarter" class="btn_quarter">Квартал</button>
-        <div class="select select-quarter">
-          <div class="select-quarter-year">
-            <span class="minus">-</span>
-            <span class="quarter-year year">2021</span>
-            <span class="plus">+</span>
-          </div>
-          <div class="select-quarter-quarter">
-            <button data-val="1">I</button>
-            <button data-val="4">II</button>
-            <button data-val="7">III</button>
-            <button data-val="10">IV</button>
-          </div>
-        </div>
-        <button data-open="select-year" class="btn_year">Год</button>
-        <div class="select select-year">
-          <div class="select-year">
-            <span class="minus">-</span>
-            <span class="year-year year">2021</span>
-            <span class="plus">+</span>
-          </div>
-          <button class="set-year">Выбрать</button>
-        </div>`;
+        return `<div class="setDateDiv">
+                    <button data-open="select-mounth" class="btn_mounth">Месяц</button>
+                    <div class="select select-mounth">
+                        <div class="select-mounth-year">
+                            <span class="minus">-</span>
+                            <span class="mounth-year year">2021</span>
+                            <span class="plus">+</span>
+                        </div>
+                        <div class="select-mounth-mounth">
+                            <button data-val="01">Янв.</button>
+                            <button data-val="02">Фев.</button>
+                            <button data-val="03">Мар.</button>
+                            <button data-val="04">Апр.</button>
+                            <button data-val="05">Май</button>
+                            <button data-val="06">Июнь</button>
+                            <button data-val="07">Июль</button>
+                            <button data-val="08">Авг.</button>
+                            <button data-val="09">Сен.</button>
+                            <button data-val="10">Окт.</button>
+                            <button data-val="11">Ноя.</button>
+                            <button data-val="12">Дек.</button>
+                        </div>
+                    </div>
+                    <button data-open="select-quarter" class="btn_quarter">Квартал</button>
+                    <div class="select select-quarter">
+                        <div class="select-quarter-year">
+                            <span class="minus">-</span>
+                            <span class="quarter-year year">2021</span>
+                            <span class="plus">+</span>
+                        </div>
+                        <div class="select-quarter-quarter">
+                            <button data-val="1">I</button>
+                            <button data-val="4">II</button>
+                            <button data-val="7">III</button>
+                            <button data-val="10">IV</button>
+                        </div>
+                    </div>
+                    <button data-open="select-year" class="btn_year">Год</button>
+                    <div class="select select-year">
+                        <div class="select-year">
+                            <span class="minus">-</span>
+                            <span class="year-year year">2021</span>
+                            <span class="plus">+</span>
+                        </div>
+                        <button class="set-year">Выбрать</button>
+                    </div>
+                </div>`;
     }
 
     startRender() {
@@ -169,7 +180,7 @@ class Report {
     }
 
     defaultButtons() {
-        $("button[data-open]").each(function() {
+        $("button[data-open]").each(function () {
             if ($(this).data("open") == 'select-mounth') $(this).text('Месяц');
             if ($(this).data("open") == 'select-quarter') $(this).text('Квартал');
             if ($(this).data("open") == 'select-year') $(this).text('Год');
@@ -178,21 +189,21 @@ class Report {
 
     bindInputChange() {
         let This = this;
-        $('.js-filter-input').on('change', function() {
+        $('.js-filter-input').on('change', function () {
 
             This.startRender();
 
         });
 
 
-        $("button[data-open]").click(function() {
+        $("button[data-open]").click(function () {
             let open = $(this).data("open");
             $('.filter .select').removeClass('active');
             $("." + open).addClass("active");
             $("button[data-open]").removeClass("active-btn");
         });
 
-        $(".select-mounth-mounth button").click(function() {
+        $(".select-mounth-mounth button").click(function () {
             let m = $(this).data("val") - 1,
                 y = $(".mounth-year").text(),
                 firstDayTMP = new Date(y, m, 1),
@@ -213,7 +224,7 @@ class Report {
             This.startRender();
         });
 
-        $(".select-quarter-quarter button").click(function() {
+        $(".select-quarter-quarter button").click(function () {
             let m = $(this).data("val") - 1,
                 y = $(".quarter-year").text(),
                 firstDayTMP = new Date(y, m, 1),
@@ -232,7 +243,7 @@ class Report {
             This.startRender();
         });
 
-        $(".set-year").click(function() {
+        $(".set-year").click(function () {
             let m = 0,
                 y = $(".year-year").text(),
                 firstDayTMP = new Date(y, m, 1),
@@ -249,18 +260,18 @@ class Report {
             This.startRender();
         });
 
-        $(".plus").click(function() {
+        $(".plus").click(function () {
             let $year = $(this).siblings(".year");
             $year.text(parseInt($year.text()) + 1);
         });
 
-        $(".minus").click(function() {
+        $(".minus").click(function () {
             let $year = $(this).siblings(".year");
             $year.text(parseInt($year.text()) - 1);
         });
 
 
-        $('.th_create').click(function() {
+        $('.th_create').click(function () {
             $('th').removeClass('sortable');
             if ($(this).hasClass('desc')) {
                 $(this).removeClass('desc').addClass('asc');
@@ -274,7 +285,7 @@ class Report {
             if ($(this).data('sort')) This.startRender();
         });
 
-        $('.th_count').click(function() {
+        $('.th_count').click(function () {
             $('th').removeClass('sortable');
             if ($(this).hasClass('desc')) {
                 $(this).removeClass('desc').addClass('asc');
@@ -303,7 +314,7 @@ class Report {
         let arrUsers = Object.values(objUsers);
 
 
-        let $select = $('<select name="user" class="js-filter-input" id="user-filt"><option value="">Все сотрудники</option></select>');
+        let $select = $('<select name="user" class="js-filter-input" id="user-filt"><option value="">Все сотрудники ОП</option></select>');
 
         for (let user of arrUsers) {
             $select.append(`<option value="${user.ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</option>`);
@@ -316,13 +327,13 @@ class Report {
     createSelect(field) {
 
         let arrOptions = [{
-                value: 'Y',
-                name: 'Да'
-            },
-            {
-                value: 'N',
-                name: 'Нет'
-            },
+            value: 'Y',
+            name: 'Да'
+        },
+        {
+            value: 'N',
+            name: 'Нет'
+        },
         ]
 
         let $select = $(`<select name="${field}" class="js-filter-input"><option value="">Все</option></select>`);
@@ -345,7 +356,7 @@ class Report {
 
     IsIterrable(iterable) {
         try {
-            for (let i of iterable) {}
+            for (let i of iterable) { }
         } catch (e) {
             return false;
         }
@@ -417,6 +428,7 @@ class Report {
 
     createTotals() {
         let chartdata = [];
+        let chartdataPie = [];
         let objUsers = this.objUsers;
         let usersTotal = this.data.totals.users;
         let totals = this.data.totals;
@@ -424,17 +436,29 @@ class Report {
         for (let user_id in usersTotal) {
 
             if (!objUsers[user_id]) continue;
-            let kpd = usersTotal[user_id]['start_prod'] / usersTotal[user_id]['closed'] * 100;
             chartdata.push({
                 "name": `${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}`,
-                'steps': kpd,
-                "href": objUsers[user_id].PHOTO.src
+                'steps': usersTotal[user_id]['count_days'] / usersTotal[user_id]['all'],
+
             });
         }
 
         this.chartData = chartdata;
 
-        totals.meanDays = this.data.items.reduce(function(accumulator, item) {
+
+        for (let user_id in usersTotal) {
+
+            if (!objUsers[user_id]) continue;
+            chartdataPie.push({
+                "name": `${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}`,
+                'tasks': usersTotal[user_id]['all'],
+
+            });
+        }
+
+        this.chartDataPie = chartdataPie;
+
+        totals.meanDays = this.data.items.reduce(function (accumulator, item) {
             return accumulator + item.COUNT_DAYS;
         }, 0) / this.data.items.length;
 
@@ -554,10 +578,12 @@ class Report {
         this.createTotals();
 
         this.createChart();
+
+        this.createChartPie();
     }
 
     sortArrayObjects(arSortable, sortableProperty, sort = 'asc') {
-        return arSortable.sort(function(a, b) {
+        return arSortable.sort(function (a, b) {
             if (sortableProperty == 'CREATED_DATE') {
                 let aa = new Date(a[sortableProperty]);
                 let bb = new Date(b[sortableProperty]);
@@ -588,117 +614,77 @@ class Report {
 
     createChart() {
         let This = this;
-        am4core.ready(function() {
+        am4core.ready(function () {
 
             // Themes begin
             am4core.useTheme(am4themes_animated);
             // Themes end
 
-            /**
-             * Chart design taken from Samsung health app
-             */
-
             var chart = am4core.create("chartdiv", am4charts.XYChart);
-            chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+            chart.padding(40, 40, 40, 40);
 
-            chart.paddingBottom = 0;
-            chart.paddingTop = 30;
-            chart.marginTop = 30;
+            var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+            categoryAxis.renderer.grid.template.location = 0;
+            categoryAxis.dataFields.category = "name";
+            categoryAxis.renderer.minGridDistance = 1;
+            categoryAxis.renderer.inversed = true;
+            categoryAxis.renderer.grid.template.disabled = true;
 
+            var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
+            valueAxis.min = 0;
+
+            var series = chart.series.push(new am4charts.ColumnSeries());
+            series.dataFields.categoryY = "name";
+            series.dataFields.valueX = "steps";
+            series.tooltipText = "{valueX.value}"
+            series.columns.template.strokeOpacity = 0;
+            series.columns.template.column.cornerRadiusBottomRight = 5;
+            series.columns.template.column.cornerRadiusTopRight = 5;
+
+            var labelBullet = series.bullets.push(new am4charts.LabelBullet())
+            labelBullet.label.horizontalCenter = "left";
+            labelBullet.label.dx = 10;
+            labelBullet.label.text = "{values.valueX.workingValue.formatNumber('#.00')}";
+            labelBullet.locationX = 1;
+
+            // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
+            series.columns.template.adapter.add("fill", function (fill, target) {
+                return chart.colors.getIndex(target.dataItem.index);
+            });
+
+            categoryAxis.sortBySeries = series;
             chart.data = This.chartData;
 
-            var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-            categoryAxis.dataFields.category = "name";
-            categoryAxis.renderer.grid.template.strokeOpacity = 0;
-            categoryAxis.renderer.minGridDistance = 10;
-            categoryAxis.renderer.labels.template.dy = 35;
-            categoryAxis.renderer.tooltip.dy = 35;
 
-            var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-            valueAxis.renderer.inside = true;
-            valueAxis.renderer.labels.template.fillOpacity = 0.3;
-            valueAxis.renderer.grid.template.strokeOpacity = 0;
-            valueAxis.min = 0;
-            valueAxis.cursorTooltipEnabled = false;
-            valueAxis.renderer.baseGrid.strokeOpacity = 0;
 
-            var series = chart.series.push(new am4charts.ColumnSeries);
-            series.dataFields.valueY = "steps";
-            series.dataFields.categoryX = "name";
-            series.tooltipText = "{valueY.value}";
-            series.tooltip.pointerOrientation = "vertical";
-            series.tooltip.dy = -6;
-            series.columnsContainer.zIndex = 100;
+        }); // end am4core.ready()
+    }
 
-            var labelBullet = series.bullets.push(new am4charts.LabelBullet());
-            labelBullet.label.verticalCenter = "bottom";
-            labelBullet.label.dy = 4;
-            labelBullet.label.text = "{values.valueY.workingValue.formatNumber('#.')}";
+    createChartPie() {
+        let This = this;
+        am4core.ready(function () {
 
-            var columnTemplate = series.columns.template;
-            columnTemplate.width = am4core.percent(50);
-            columnTemplate.maxWidth = 44;
-            columnTemplate.column.cornerRadius(60, 60, 10, 10);
-            columnTemplate.strokeOpacity = 0;
+            // Themes begin
+            am4core.useTheme(am4themes_animated);
+            // Themes end
 
-            series.heatRules.push({ target: columnTemplate, property: "fill", dataField: "valueY", min: am4core.color("#e5dc36"), max: am4core.color("#5faa46") });
-            series.mainContainer.mask = undefined;
+            // Create chart
+            var chartPie = am4core.create("chartdiv_pie", am4charts.PieChart);
+            chartPie.data = This.chartDataPie;
+            // Add and configure Series
+            var pieSeries = chartPie.series.push(new am4charts.PieSeries());
+            pieSeries.dataFields.value = "tasks";
+            pieSeries.dataFields.category = "name";
+            pieSeries.slices.template.stroke = am4core.color("#fff");
+            pieSeries.slices.template.strokeOpacity = 1;
 
-            var cursor = new am4charts.XYCursor();
-            chart.cursor = cursor;
-            cursor.lineX.disabled = true;
-            cursor.lineY.disabled = true;
-            cursor.behavior = "none";
+            // This creates initial animation
+            pieSeries.hiddenState.properties.opacity = 1;
+            pieSeries.hiddenState.properties.endAngle = -90;
+            pieSeries.hiddenState.properties.startAngle = -90;
 
-            var bullet = columnTemplate.createChild(am4charts.CircleBullet);
-            bullet.circle.radius = 20;
-            bullet.valign = "bottom";
-            bullet.align = "center";
-            bullet.isMeasured = true;
-            bullet.mouseEnabled = false;
-            bullet.verticalCenter = "bottom";
-            bullet.interactionsEnabled = false;
+            chartPie.hiddenState.properties.radius = am4core.percent(0);
 
-            var hoverState = bullet.states.create("hover");
-            var outlineCircle = bullet.createChild(am4core.Circle);
-            outlineCircle.adapter.add("radius", function(radius, target) {
-                var circleBullet = target.parent;
-                return circleBullet.circle.pixelRadius + 5;
-            })
-
-            var image = bullet.createChild(am4core.Image);
-            image.width = 40;
-            image.height = 40;
-            image.horizontalCenter = "middle";
-            image.verticalCenter = "middle";
-            image.propertyFields.href = "href";
-
-            image.adapter.add("mask", function(mask, target) {
-                var circleBullet = target.parent;
-                return circleBullet.circle;
-            })
-
-            var previousBullet;
-            /*chart.cursor.events.on("cursorpositionchanged", function(event) {
-                var dataItem = series.tooltipDataItem;
-
-                if (dataItem.column) {
-                    var bullet = dataItem.column.children.getIndex(1);
-
-                    if (previousBullet && previousBullet != bullet) {
-                        previousBullet.isHover = false;
-                    }
-
-                    if (previousBullet != bullet) {
-
-                        var hs = bullet.states.getKey("hover");
-                        hs.properties.dy = -bullet.parent.pixelHeight + 30;
-                        bullet.isHover = true;
-
-                        previousBullet = bullet;
-                    }
-                }
-            })*/
 
         }); // end am4core.ready()
     }

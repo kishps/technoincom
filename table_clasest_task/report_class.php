@@ -14,12 +14,17 @@ class TasksClosestReport
         if (!\CModule::IncludeModule("tasks")) return 'not IncludeModule("tasks")';
         $arReturn = [];
         $arReturn['params'] = $params;
-        /*****Фильтры***** */
+        /*****Фильтры******/
         $t_arFilter=[];
         $t_arFilter['>CLOSED_DATE']='01.01.1990';
         if ($params['dateFrom']) $t_arFilter['>=CREATED_DATE'] = $params['dateFrom'];
         if ($params['dateTo']) $t_arFilter['<=CREATED_DATE'] = $params['dateTo'];
-        if ($params['user']) $t_arFilter['RESPONSIBLE_ID'] = $params['user'];
+        if ($params['user']) {
+            $t_arFilter['RESPONSIBLE_ID'] = $params['user'];
+        } else {
+            $t_arFilter['RESPONSIBLE_ID'] = self::getUsersId();
+        }
+        
 
         $sort = ($params['sort']) ? $params['sort'] : 'ASC';
         $arReturn['t_arFilter'] = $t_arFilter;
@@ -51,7 +56,7 @@ class TasksClosestReport
 
             if ($arTask['CLOSED_DATE'])  $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['closed']++;
 
-
+            $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['count_days']+= $arTask['COUNT_DAYS'];
 
             $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['all']++;
             $arReturn['totals']['all']++;
@@ -91,6 +96,20 @@ class TasksClosestReport
             $arUsers[$ar['ID']]['PHOTO'] = $arrFile;
         }
         return $arUsers;
+    }
+
+    public static function getUsersId()
+    {
+        $res = \CUser::GetList(
+            $t_by       = 'last_name',
+            $t_order    = 'asc',
+            $t_filter   = ['ACTIVE' => 'Y', 'UF_DEPARTMENT' => 3],
+            $t_arParams = ['FIELDS' => ['ID', 'NAME', 'LAST_NAME', 'PERSONAL_PHOTO']]
+        );
+        while ($ar = $res->Fetch()) {
+            $arUsersId[] = $ar['ID'];
+        }
+        return $arUsersId;
     }
 
 

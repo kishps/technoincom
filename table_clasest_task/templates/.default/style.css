@@ -122,6 +122,11 @@ div.not_prod-stage {
     height: 300px;
 }
 
+#chartdiv_pie {
+    width: 100%;
+    height: 400px;
+}
+
 
 /*----------------------new 27.08.2021-----------------------*/
 
@@ -454,4 +459,93 @@ font-size: 20px;
 	cursor: pointer;
 	position: relative;
 	padding-right: 25px !important;
+}
+
+/*------*/
+
+#report {
+	display: flex;
+	flex-wrap: wrap;
+}
+#report .left-side {
+	flex-basis: 437px;
+	max-width: 437px;
+	width: 100%;
+}
+#report .charts {
+	flex-basis: calc(100% - 437px);
+	max-width: calc(100% - 437px);
+	width: 100%;
+}
+#report .table-tasks {
+	flex-basis: 100%;
+	max-width: 100%;
+	width: 100%;
+}
+
+#report .filter button {
+	margin-bottom: 0;
+}
+#report .params-table {
+	position: relative;
+	top: 0;
+	left: 0;
+}
+#report .params-table tr:first-child td:first-child::before {
+	display: none;
+}
+/*
+#report {
+	display: grid;
+	grid-gap: 8px;
+	grid-template-areas:
+		"a d d d"
+		"b d d d"
+		"c d d d"
+		"e e e e";
+}
+#report .left-side {
+  grid-area: a;
+}
+#report .params-list {
+  grid-area: b;
+}
+#report .totals {
+  grid-area: c;
+}
+#report .charts{
+  grid-area: d;
+}
+#report .table-tasks {
+  grid-area: e;
+}
+*/
+
+#report .left-side .filter-item {
+	margin: 10px 0;
+}
+#report .left-side .filter + div {
+	margin-top: 25px;
+    padding: 10px 20px;
+    border: 1px solid #e3e7ea;
+    border-radius: 3px;
+}
+#report .left-side .filter-item select {
+	border: 1px solid #e3e7ea;
+    height: 30px;
+    border-radius: 3px;
+    padding: 0 10px;
+}
+#report .left-side .filter-item label {
+	width: 120px;
+	display: inline-block;
+}
+#report .params-table {
+	width: 437px;
+}
+#report .params-list, #report .totals {
+	margin-top: 25px;
+}
+#chartdiv_pie {
+	height: 310px;
 }
