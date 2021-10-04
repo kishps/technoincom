@@ -387,9 +387,16 @@
             if (PlanFactAnalyz.fact && PlanFactAnalyz.fact.DATA && PlanFactAnalyz.fact.DATA.PLAN && PlanFactAnalyz.fact.DATA.PLAN[planItem] && PlanFactAnalyz.fact.DATA.PLAN[planItem].printed) continue;
             if (planItem == 0 || planItem === 0) continue;
 
+            let src = '';
+            try {
+                src = PlanFactAnalyz.fact.USERS[planItem].PHOTO.src;
+            } catch (error) {
+                console.log(error);
+            }
+
             let cardPlanItem = `<div class="user-card" data-id="${planItem}">
                                     <div class="user-plan">
-                                        <div class="photo-img"><img src="${PlanFactAnalyz.fact.USERS[planItem].PHOTO.src}" alt="${PlanFactAnalyz.fact.USERS[planItem].NAME}"></div>
+                                        <div class="photo-img"><img src="${src}" alt="${PlanFactAnalyz.fact.USERS[planItem].NAME}"></div>
                                         <div class="user-plan-name">
                                             ${PlanFactAnalyz.fact.USERS[planItem].NAME} ${PlanFactAnalyz.fact.USERS[planItem].LAST_NAME}
                                         </div>
@@ -427,9 +434,17 @@
             if (PlanFactAnalyz.settings && PlanFactAnalyz.settings.current && PlanFactAnalyz.settings.current[planItem] && PlanFactAnalyz.settings.current[planItem].PLAN_USER) continue;
             if (planItem == 0 || planItem === 0) continue;
 
+            let src = '';
+            try {
+                src = PlanFactAnalyz.fact.USERS[planItem].PHOTO.src;
+                
+            } catch (error) {
+                console.log(error);
+            }
+            
             let cardPlanItem = `<div class="user-card" data-id="${planItem}">
                                     <div class="user-plan">
-                                        <div class="photo-img"><img src="${PlanFactAnalyz.fact.USERS[planItem].PHOTO.src}" alt="${PlanFactAnalyz.fact.USERS[planItem].NAME}"></div>
+                                        <div class="photo-img"><img src="${src}" alt="${PlanFactAnalyz.fact.USERS[planItem].NAME}"></div>
                                         <div class="user-plan-name">
                                             ${PlanFactAnalyz.fact.USERS[planItem].NAME} ${PlanFactAnalyz.fact.USERS[planItem].LAST_NAME}
                                         </div>
@@ -438,7 +453,7 @@
                                     </div>
                                 </div>
             `;
-
+            
             if ($('.user-card.company').length > 0) {
                 $('.user-card.company').before(cardPlanItem);
                 console.log('before');
@@ -462,6 +477,14 @@
 
             },
         }).done(function(data) {
+            
+            
+            try {
+                PlanFactAnalyz.fact = JSON.parse(data.trim());
+            } catch (error) {
+                console.log('error',error);
+                console.log('data',data);
+            }
             PlanFactAnalyz.fact = JSON.parse(data.trim());
             makeKards();
             makeOtherKards();

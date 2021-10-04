@@ -460,15 +460,24 @@ class Report extends CBitrixComponent
         // ### 12 # Приход ДС (руб c НДС) # ИБ 53 "Поступления" # prihod_ds_whithNDS
         self::fReport_hlp_get_prihod_ds_whithNDS($result, $params);
 
-        // ### 13 # Отгружено Заказов # orders_shipped
-        self::fReport_hlp_get_orders_shipped($result, $params);
-
         // ### 14 # Cумма запущенных в пр-во заказов # ИБ 17 "Запуск Заказа в производство" # production_summ
         self::fReport_hlp_get_production_summ($result, $params);
 
-        // ### 15 # Cумма отгруженных в пр-во заказов # ИБ 17 "Запуск Заказа в производство" # orders_shipped_summ
-        self::fReport_hlp_get_orders_shipped_summ($result, $params);
 
+        //если начальная дата периода до 01.10.21 показывать старые задачи
+        if ($params['dateFrom'] < new DateTime('2021-10-01 00:00:00')) {
+                // ### 13 # Отгружено Заказов # orders_shipped
+            self::fReport_hlp_get_orders_shipped($result, $params);
+
+            // ### 15 # Cумма отгруженных в пр-во заказов # ИБ 17 "Запуск Заказа в производство" # orders_shipped_summ
+            self::fReport_hlp_get_orders_shipped_summ($result, $params);
+
+        } else {
+            // ### 15 # Cумма отгруженных в пр-во заказов # ИБ 17 "Запуск Заказа в производство" # orders_shipped_summ
+            self::fReport_hlp_get_orders_shipped_summ_new_UPD($result, $params);
+
+        }
+       
         // ### 16 # Cумма отгруженных в пр-во заказов # ИБ 17 "Запуск Заказа в производство" # orders_shipped_summ
         self::fReport_hlp_get_conversion_company($result, $params);
 
@@ -1948,76 +1957,134 @@ class Report extends CBitrixComponent
 
 
 
-
-        // if (is_null($params['dateTo'])) {
-        //    $t_arFilter = [
-        //     'IBLOCK_ID'       => 17,
-        //     'CREATED_USER_ID' => $params['user_id'],
-        //     '>='.'PROPERTY_DATA_OTGRUZKI' => $params['dateFrom']->format('Y-m-d'),
-        //  ]; 
-        // } else {
-        //     $t_arFilter = [
-        //     'IBLOCK_ID'       => 17,
-        //     'CREATED_USER_ID' => $params['user_id'],
-        //     '>='.'PROPERTY_DATA_OTGRUZKI' => $params['dateFrom']->format('Y-m-d'),
-        //     '<='.'PROPERTY_DATA_OTGRUZKI' => $params['dateTo']->format('Y-m-d'),
-        //  ];
-        // }
-
-        // //self::fLog($t_arFilter, '$t_arFilter');
-
-        // $t_arSelectFields = [
-        //     'ID',
-        //     'PROPERTY_DATA_OTGRUZKI',
-        //     'PROPERTY_PRIVYAZKA',
-        //     'PROPERTY_SUMMA_SDELKI_BEZ_NDS_PO_SPETSIFIKATSII',
-        // ];
+    } // function
 
 
-        //  $res = \CIBlockElement::GetList( array(), $t_arFilter, false, false, $t_arSelectFields);
+    public static function fReport_hlp_get_orders_shipped_summ_new_UPD(&$result, $params)
+    {
 
-        //  while ($ar = $res->fetch()) {
-        //     $timeTMP = MakeTimeStamp($ar["PROPERTY_DATA_OTGRUZKI_VALUE"]);
+        // ### 15 # Запущен БП Производства Заказа # ИБ 17 "Запуск Заказа в производство" # production_summ
 
-        //     if (!$timeTMP) {
-        //         continue; // На всякий
-        //     }
+        $resultKey    = 'a_orders_shipped_summ';
+        if(!in_array($resultKey, self::$param_filter_forTable)){
+            return;
+        } 
+      //self::fLog('no return','a_orders_shipped_summ');
+        /*$varvarDUMP = json_encode($params);
+        echo "<script> console.log(\"params\")</script>";
+        echo "<script> console.log({$varvarDUMP})</script>";*/
 
-        //     $timeTMP = MakeTimeStamp($ar['PROPERTY_DATA_OTGRUZKI_VALUE']);
-        //     $time = new DateTime();
-        //     $time->setTimestamp($timeTMP);
-        //     $time->setTime(0, 0);
-        //     $time = $time->getTimestamp();
+        // Выбираем все задачи пользователя с ID = 22
+        if (!CModule::IncludeModule("tasks")) return;
 
-        //     $deal_id = (int) $ar['PROPERTY_PRIVYAZKA_VALUE']; // 0 - не указана
+        if (is_null($params['dateTo'])) {
+            $t_arFilter = array("TITLE" => "%Сформировать Универсальный передаточный документ%", '>=CLOSED_DATE' => ($params['dateFrom'])?$params['dateFrom']->format('d.m.Y'):'');
+        } else {
+            $t_arFilter = array(
+                "TITLE" => "%Сформировать Универсальный передаточный документ%",
+                '>=CLOSED_DATE' => $params['dateFrom']->format('d.m.Y'),
+                '<=CLOSED_DATE' => $params['dateTo']->format('d.m.Y')
+            );
+        }
 
-        //     self::fReport_hlp_AddElement([
-        //         'result'  => &$result,
-        //         'time'    => $time,
-        //         'deal_id' => $deal_id,
-        //     ]);
+        $res = CTasks::GetList(
+            array("TITLE" => "ASC"),
+            $t_arFilter,
+            array('UF_CRM_TASK', 'CLOSED_DATE', 'DESCRIPTION', 'ID')
+        );
 
-        //     $result[ $time ]['items'][ $resultKey ]['count']++;
-        //     $result[ $time ]['detail'][ $deal_id ][ $resultKey ]['count']++;
+        while ($arTask = $res->GetNext()) {
+            //echo "Task name: ".$arTask["TITLE"]."<br>";
 
-        //     $str = str_replace(' ', '', $ar["PROPERTY_SUMMA_SDELKI_BEZ_NDS_PO_SPETSIFIKATSII_VALUE"]);
-        //     $arTMP = explode('|', $str);
-        //     $arTMP1 = explode(',', $str);
+            foreach ($arTask['UF_CRM_TASK'] as $crm) {
+                if (strrpos($crm, 'D_') === 0) {
+                    $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
+                }
+            }
 
-        //     if ($arTMP1[1] != '00') {
-        //         $arTMP1[0] = floatval($arTMP1[0])+($arTMP1[1]*pow(10, -2));
-        //     }
+            if (!is_array($params['user_id']) && ($params['user_id'])) {
+                if ($params['user_id'] != self::$responsibleIdForDeal[$arTask['UF_CRM_TASK']]) continue;
+            }
 
-        //     $price = $arTMP1[0];
-        //     $title = number_format($arTMP1[0], 2, ',', ' ');
+            unset($tdItem);
 
-        //     $result[ $time ]['items'][ $resultKey ]['price'] += $price;
-        //     $result[ $time ]['detail'][ $deal_id ][ $resultKey ]['items'][ $ar['ID'] ] = [
-        //         'title' => $title,
-        //     ];
-        //  };
+            $timeTMP = MakeTimeStamp($arTask["CLOSED_DATE"]);
+
+            if (!$timeTMP) {
+                continue; // На всякий
+            }
+
+            $timeTMP = MakeTimeStamp($arTask['CLOSED_DATE']);
+            $time = new DateTime();
+            $time->setTimestamp($timeTMP);
+            $time->setTime(0, 0);
+            $time = $time->getTimestamp();
+
+            $deal_id = (int) $arTask['UF_CRM_TASK']; // 0 - не указана
+
+            self::fReport_hlp_AddElement([
+                'result'  => &$result,
+                'time'    => $time,
+                'deal_id' => $deal_id,
+            ]);
+
+            $BPupd = self::getBPupd($deal_id);
+            
+
+            $result[$time]['items'][$resultKey]['count']++;
+            $result[$time]['detail'][$deal_id][$resultKey]['count']++;
+
+            $str = str_replace(' ', '', $BPupd["SUMMA_OTGRUZKI_PO_SPETSIFIKATSII"]);
+            $arTMP = explode('|', $str);
+            $arTMP1 = explode(',', $str);
+
+            if ($arTMP1[1] != '00') {
+                $arTMP1[0] = floatval($arTMP1[0]) + ($arTMP1[1] * pow(10, -2));
+            }
+
+            $price = $arTMP1[0];
+            $title = number_format($arTMP1[0], 2, ',', ' ');
+
+            $result[$time]['items'][$resultKey]['price'] += $price;
+            $result[$time]['detail'][$deal_id][$resultKey]['items'][$arTask['ID']] = [
+                'title' => $title,
+                'link'  => "/company/personal/user/22/tasks/task/view/{$arTask['ID']}/",
+            ];
+
+
+
+            $result[$time]['items']['a_orders_shipped']['count']++;
+            $result[$time]['detail'][$deal_id]['a_orders_shipped']['count']++;
+
+            $result[$time]['detail'][$deal_id]['a_orders_shipped']['items'][$arTask['ID']] = [
+                'title' => '1',
+                //'price' => "1",
+                //'link'  => "/company/personal/user/22/tasks/task/view/{$arTask['ID']}/",
+            ];
+        }
+
+
 
     } // function
+
+
+    /**
+     * Получить БП УПД
+     */
+    public static function getBPupd($deal_id)
+    {
+        $arSelect = array("ID", "NAME", "PROPERTY_SUMMA_OTGRUZKI_PO_SPETSIFIKATSII", 'PROPERTY_SDELKA_SHIFR_NAZVANIE','PROPERTY_GRUPPA_IZDELIY');
+        $arFilter = array("IBLOCK_ID" => 62, "PROPERTY_SDELKA_SHIFR_NAZVANIE" => $deal_id);
+        $res = \CIBlockElement::GetList(array(), $arFilter, false, array(), $arSelect);
+        while ($ob = $res->GetNextElement()) {
+            $arFields = $ob->GetFields(); 
+            return ['ID'=> $arFields['ID'], 'NAME'=> $arFields['NAME'], 'SUMMA_OTGRUZKI_PO_SPETSIFIKATSII'=> $arFields['PROPERTY_SUMMA_OTGRUZKI_PO_SPETSIFIKATSII_VALUE'], 'GRUPPA_IZDELIY'=> $arFields['PROPERTY_GRUPPA_IZDELIY_VALUE']];
+           //$arRet[]=$arFields;
+
+        }
+        //return $arRet;
+
+    }
 
 
     public static function fReport_hlp_get_summ_for_deal(&$result, $params)

@@ -18,7 +18,7 @@ $ar = [
 if (in_array($F_DATE_TYPE, $ar)) {
     $classFilterDate = $ar[$F_DATE_TYPE];
 }
-
+echo "<script> console.log('arResult12',".json_encode($arResult).")</script>";
 $this->addExternalJS('/local/vendor/jquery/jquery-3.4.1.min.js');
 
 ?>

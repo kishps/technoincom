@@ -12,12 +12,12 @@ class Report {
     filterTitles = {
         dateFrom: 'Интервал от',
         dateTo: 'Интервал до',
-        closed: 'Закрытые',
+        closed: 'Закрыта "Получить заказ по расчету"',
         start_prod: 'Запущен БП производства',
         user: 'Сотрудник',
         sort: 'Сортировка по дате',
         after30: 'Больше 30 дней',
-        deal_success: 'Сделка успешна'
+        deal_success: 'Завершено с производством'
     }
     paramsList = {};
     chartData = []; //данные для графика
@@ -73,7 +73,7 @@ class Report {
                                     <label class="label" for="deal_success">${filterTitles.deal_success}:</label>
                                     
                                     </div>
-                                    <div class="filter-item" data-filter="user">
+                                                                        <div class="filter-item" data-filter="user">
                                         <label class="label" for="user">${filterTitles.user}:</label>
 
                                     </div>
@@ -105,7 +105,7 @@ class Report {
                                     Запущен БП производства
                                 </th>
                                 <th>
-                                    Сделка успешна
+                                    Завершено с производством
                                 </th>
                             </tr>
                         </thead>
@@ -237,7 +237,7 @@ class Report {
             let m = $(this).data("val") - 1,
                 y = $(".quarter-year").text(),
                 firstDayTMP = new Date(y, m, 1),
-                lastDayTMP = new Date(y, m + 4, 0);
+                lastDayTMP = new Date(y, m + 3, 0);
 
             $("#dateFrom").val(BX.date.format("d.m.Y", firstDayTMP));
             $("#dateTo").val(BX.date.format("d.m.Y", lastDayTMP));
@@ -442,10 +442,12 @@ class Report {
         let totals = this.data.totals;
 
         for (let user_id in usersTotal) {
+
             if (!objUsers[user_id]) continue;
+            let kpd = usersTotal[user_id]['start_prod'] / usersTotal[user_id]['closed'] * 100;
             chartdata.push({
                 "name": `${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}`,
-                'steps': usersTotal[user_id],
+                'steps': kpd,
                 "href": objUsers[user_id].PHOTO.src
             });
         }
@@ -471,6 +473,9 @@ class Report {
                                 </tr>
                                 <tr>
                                 <td>Среднее время продолжительности задачи (дн.)</td><td>${(totals.meanDays) ? totals.meanDays.toFixed(2) : ''}</td>
+                                </tr>
+                                <tr>
+                                <td>Эффективность в %</td><td>${(totals.start_prod.Y && totals.closed.Y) ? (totals.start_prod.Y/totals.closed.Y*100).toFixed(2) : ''}</td>
                                 </tr>
                                 `);
 
@@ -499,9 +504,9 @@ class Report {
 
             let user = this.objUsers[item.RESPONSIBLE_ID];
 
-            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'Y')? 'Да' : item.UF_AUTO_691625133653;
-            item.UF_AUTO_691625133653 =  (item.UF_AUTO_691625133653 == 'N')? 'Нет' : item.UF_AUTO_691625133653;
-            
+            item.UF_AUTO_691625133653 = (item.UF_AUTO_691625133653 == 'Y') ? 'Да' : item.UF_AUTO_691625133653;
+            item.UF_AUTO_691625133653 = (item.UF_AUTO_691625133653 == 'N') ? 'Нет' : item.UF_AUTO_691625133653;
+
 
             let userinfoDiv = (user) ? `<div data-user="${item.RESPONSIBLE_ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</div>` : 'Сотрудник не из отдела продаж';
             $("#report .table-tasks tbody").append(`
@@ -635,6 +640,8 @@ class Report {
             chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
 
             chart.paddingBottom = 0;
+            chart.paddingTop = 30;
+            chart.marginTop = 30;
 
             chart.data = This.chartData;
 
@@ -663,7 +670,7 @@ class Report {
 
             var labelBullet = series.bullets.push(new am4charts.LabelBullet());
             labelBullet.label.verticalCenter = "bottom";
-            labelBullet.label.dy = -10;
+            labelBullet.label.dy = 4;
             labelBullet.label.text = "{values.valueY.workingValue.formatNumber('#.')}";
 
             var columnTemplate = series.columns.template;
@@ -710,7 +717,7 @@ class Report {
             })
 
             var previousBullet;
-            chart.cursor.events.on("cursorpositionchanged", function(event) {
+            /*chart.cursor.events.on("cursorpositionchanged", function(event) {
                 var dataItem = series.tooltipDataItem;
 
                 if (dataItem.column) {
@@ -729,7 +736,7 @@ class Report {
                         previousBullet = bullet;
                     }
                 }
-            })
+            })*/
 
         }); // end am4core.ready()
     }

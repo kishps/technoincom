@@ -9,10 +9,10 @@ header('Content-Type: application/json');
 
 switch ($_REQUEST['action']) {
     case 'getTasks':
-        echo json_encode(\CSN\Tasks::getTasks($_REQUEST['filter']));
+        echo json_encode(\CSN\TasksReport::getTasks($_REQUEST['filter']));
     break;
     case 'getUsers':
-        echo json_encode(\CSN\Tasks::getUsers());
+        echo json_encode(\CSN\TasksReport::getUsers());
     break;
     default:
         echo json_encode('bad request');
