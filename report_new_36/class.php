@@ -463,8 +463,7 @@ class Report extends CBitrixComponent
         // ### 14 # Cумма запущенных в пр-во заказов # ИБ 17 "Запуск Заказа в производство" # production_summ
         self::fReport_hlp_get_production_summ($result, $params);
 
-
-        //если начальная дата периода до 01.10.21 показывать старые задачи
+       
         if ($params['dateFrom'] < new DateTime('2021-10-01 00:00:00')) {
                 // ### 13 # Отгружено Заказов # orders_shipped
             self::fReport_hlp_get_orders_shipped($result, $params);
@@ -2003,12 +2002,24 @@ class Report extends CBitrixComponent
 
         while ($arTask = $res->GetNext()) {
             //echo "Task name: ".$arTask["TITLE"]."<br>";
-
+            
             foreach ($arTask['UF_CRM_TASK'] as $crm) {
                 if (strrpos($crm, 'D_') === 0) {
                     $arTask['UF_CRM_TASK'] = str_replace('D_', '', $crm);
                 }
             }
+                        //узнаем ответственного по сделке, к которой приявязана задача
+                        $rsDeal =  CCrmDeal::GetListEx(
+                            $arOrder = array('CLOSEDATE' => 'asc'),
+                            array('ID' => $arTask['UF_CRM_TASK']),
+                            $arGroupBy = false,
+                            $arNavStartParams = false,
+                            $arSelectFields = array('ASSIGNED_BY_ID')
+                        );
+                        if ($ar = $rsDeal->GetNext()) {
+                            self::$responsibleIdForDeal[$ar['ID']] = $ar['ASSIGNED_BY_ID'];
+                        }
+
 
             if (!is_array($params['user_id']) && ($params['user_id'])) {
                 if ($params['user_id'] != self::$responsibleIdForDeal[$arTask['UF_CRM_TASK']]) continue;
