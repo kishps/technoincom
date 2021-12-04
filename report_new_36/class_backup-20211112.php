@@ -1211,31 +1211,23 @@ class Report extends CBitrixComponent
                 }
 
 
-                $taskArr = [];
+
                 $res1 = CTasks::GetList(
                     array("TITLE" => "ASC"),
                     array("TITLE" => "%Отгрузка заказа КЛИЕНТУ", 'STATUS' => 5, 'UF_CRM_TASK' => 'D_' . $ar['PROPERTY_SDELKA_VALUE']),
                     array('UF_CRM_TASK', 'TITLE', "RESPONSIBLE_ID", 'ID', 'CLOSED_DATE', 'DESCRIPTION')
                 );
+                $taskArr = [];
                 while ($arTask1 = $res1->GetNext()) {
                     $taskArr[] = $arTask1;
                 }
-                $res2 = CTasks::GetList(
-                    array("TITLE" => "ASC"),
-                    array("TITLE" => "%ВЛОЖИТE СКАН НАКЛАДНОЙ ОТПРАВИТЕЛЯ%", 'STATUS' => 5, 'UF_CRM_TASK' => 'D_' . $ar['PROPERTY_SDELKA_VALUE']),
-                    array('UF_CRM_TASK', 'TITLE', "RESPONSIBLE_ID", 'ID', 'CLOSED_DATE', 'DESCRIPTION')
-                );
-                while ($arTask2 = $res2->GetNext()) {
-                    $taskArr[] = $arTask2;
-                }
-                unset($res1);
-                unset($res2);
 
 
                 if (!$taskArr) continue; //если нет закрытых задач "Отгрузка товаров клиенту" по первой сделке компании
 
-                function cmp_function($a, $b)
+                 function cmp_function($a, $b)
                 {
+
                     return (date($a['CLOSED_DATE']) > date($b['CLOSED_DATE']));
                 }
                 uasort($taskArr, 'cmp_function');
