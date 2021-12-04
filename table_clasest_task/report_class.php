@@ -36,7 +36,7 @@ class TasksClosestReport
         );
 
         $i = 0;
-        $limit = 1000;
+        $limit = 500000;
 
 
         /**Обработка******/
@@ -87,7 +87,7 @@ class TasksClosestReport
         $res = \CUser::GetList(
             $t_by       = 'last_name',
             $t_order    = 'asc',
-            $t_filter   = ['ACTIVE' => 'Y', 'UF_DEPARTMENT' => 3],
+            $t_filter   = ['ACTIVE' => 'Y'],
             $t_arParams = ['FIELDS' => ['ID', 'NAME', 'LAST_NAME', 'PERSONAL_PHOTO']]
         );
         while ($ar = $res->Fetch()) {
@@ -103,7 +103,7 @@ class TasksClosestReport
         $res = \CUser::GetList(
             $t_by       = 'last_name',
             $t_order    = 'asc',
-            $t_filter   = ['ACTIVE' => 'Y', 'UF_DEPARTMENT' => 3],
+            $t_filter   = ['ACTIVE' => 'Y'],
             $t_arParams = ['FIELDS' => ['ID', 'NAME', 'LAST_NAME', 'PERSONAL_PHOTO']]
         );
         while ($ar = $res->Fetch()) {

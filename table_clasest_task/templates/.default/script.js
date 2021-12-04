@@ -1,3 +1,55 @@
+/**
+ * Плагин селекта с чекбоксами
+ */
+(function ($) {
+    function setChecked(target) {
+        var checked = $(target).find("input[type='checkbox']:checked").length;
+        if ($(target).find("input[type='checkbox']:checked").val()=='all') {
+            checked = 'все сотрудники';
+        }
+        if (checked) {
+            $(target).find('select option:first').html('Выбрано: ' + checked);
+        } else {
+            $(target).find('select option:first').html('Выберите из списка');
+        }
+    }
+    $.fn.checkselect = function () {
+        this.wrapInner('<div class="checkselect-popup"></div>');
+        this.prepend(
+            '<div class="checkselect-control">' +
+            '<select class="form-control"><option></option></select>' +
+            '<div class="checkselect-over"></div>' +
+            '</div>'
+        );
+
+        this.each(function () {
+            setChecked(this);
+        });
+
+        this.find('input[type="checkbox"]').click(function () {
+            setChecked($(this).parents('.checkselect'));
+        });
+
+        this.parent().find('.checkselect-control').on('click', function () {
+            $popup = $(this).next();
+            $('.checkselect-popup').not($popup).css('display', 'none');
+            if ($popup.is(':hidden')) {
+                $popup.css('display', 'block');
+                $(this).find('select').focus();
+            } else {
+                $popup.css('display', 'none');
+            }
+        });
+
+        $('html, body').on('click', function (e) {
+            if ($(e.target).closest('.checkselect').length == 0) {
+                $('.checkselect-popup').css('display', 'none');
+            }
+        });
+    };
+
+})(jQuery);
+
 class Report {
     /**
      * Фильтр вида {dateFrom:'01.07.2021', dateTo:'31.08.2021', closed:true , start_prod:true, user:12}
@@ -97,7 +149,7 @@ class Report {
                         </tbody>
                     </table>`);
         $('[data-filter="user"]').append(this.$arrUsersSelect);
-
+        $('.checkselect').checkselect();
         $('[data-filter="after30"]').append(this.createSelect('after30'));
 
         this.bindInputChange();
@@ -111,6 +163,19 @@ class Report {
         //this.renderReport();
 
     }
+
+    setChecked(target) {
+        let checked = $(target).find("input[type='checkbox']:checked").length;
+        if ($(target).find("input[type='checkbox']:checked").val()=='all') {
+            checked = 'все сотрудники';
+        }
+        if (checked) {
+            $(target).find('select option:first').html('Выбрано: ' + checked);
+        } else {
+            $(target).find('select option:first').html('Выберите из списка');
+        }
+    }
+
 
     createSetDateDiv() {
         return `<div class="setDateDiv">
@@ -163,15 +228,19 @@ class Report {
     }
 
     startRender() {
+        let arrSelectedUsers = [];
+        $('input[name="user[]"]:checked').each(function () {
+            arrSelectedUsers.push($(this).val());
+        });
         let params = {
             dateFrom: $('input[name="dateFrom"]').val(),
             dateTo: $('input[name="dateTo"]').val(),
-            closed: $('select[name="closed"]').val(),
-            start_prod: $('select[name="start_prod"]').val(),
-            user: $('select[name="user"]').val(),
+            //closed: $('select[name="closed"]').val(),
+            //start_prod: $('select[name="start_prod"]').val(),
+            user: arrSelectedUsers,
             sort: $('.th_create').data('sort'),
             after30: $('select[name="after30"]').val(),
-            deal_success: $('select[name="deal_success"]').val(),
+            //deal_success: $('select[name="deal_success"]').val(),
         }
         console.log("🚀 ~ file: script.js ~ line 59 ~ Report ~ $ ~ params", params)
 
@@ -304,6 +373,27 @@ class Report {
             This.startRender();
         });
 
+
+        $('input[name="all_users"]').click(function () {
+            if ($(this).is(':checked')) {
+                $('input[name="user[]"]').prop('checked', false);
+            } else {
+                $(this).prop('checked', true);
+                $('input[name="user[]"]').prop('checked', false);
+            }
+
+            This.setChecked('.checkselect');
+
+            
+        });
+
+        $('input[name="user[]"]').click(function () {
+            if ( $('input[name="all_users"]').is(':checked')) {
+                $('input[name="all_users"]').prop('checked', false);
+            }
+            This.setChecked('.checkselect');
+        });
+
     }
 
 
@@ -314,14 +404,15 @@ class Report {
         let arrUsers = Object.values(objUsers);
 
 
-        let $select = $('<select name="user" class="js-filter-input" id="user-filt"><option value="">Все сотрудники ОП</option></select>');
+        let $select = $('<div  name="user" class="js-filter-input checkselect" id="user-filt"><label><input name="all_users" value="all" type="checkbox" checked>Все сотрудники</label></div>');
 
         for (let user of arrUsers) {
-            $select.append(`<option value="${user.ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</option>`);
+            $select.append(`<label><input name="user[]" type="checkbox" value="${user.ID}">${user.NAME}  ${user.LAST_NAME}</label>`);
         }
 
         this.$arrUsersSelect = $select;
         this.objUsers = objUsers;
+
     }
 
     createSelect(field) {
@@ -427,6 +518,7 @@ class Report {
     }
 
     createTotals() {
+        if (!this.data) return;
         let chartdata = [];
         let chartdataPie = [];
         let objUsers = this.objUsers;
@@ -553,6 +645,7 @@ class Report {
                                     </tbody>
                                 </table>`);
         for (let param_code in paramsList) {
+            if (param_code == 'user') continue;
             $('.params-table tbody')
                 .append(`<tr>
                             <td>${paramsList[param_code].title}</td>
@@ -565,6 +658,8 @@ class Report {
         let response = await this.getTasks();
         if (!this.IsJsonString(response)) {
             $("#report .table-tasks tbody").html('');
+            $("#chartdiv").html('');
+            $("#chartdiv_pie").html('');
             alert('Данные по фильтру не найдены');
             return console.error(response);
         };
@@ -581,6 +676,8 @@ class Report {
 
         this.createChartPie();
     }
+
+
 
     sortArrayObjects(arSortable, sortableProperty, sort = 'asc') {
         return arSortable.sort(function (a, b) {
