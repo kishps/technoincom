@@ -14,6 +14,9 @@ switch ($_REQUEST['action']) {
     case 'getUsers':
         echo json_encode(\CSN\TasksClosestReport::getUsers());
     break;
+    case 'getGroups':
+        echo json_encode(\CSN\TasksClosestReport::getGroups());
+    break;
     default:
         echo json_encode('bad request');
     break;        

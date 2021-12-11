@@ -4,8 +4,8 @@
 (function ($) {
     function setChecked(target) {
         var checked = $(target).find("input[type='checkbox']:checked").length;
-        if ($(target).find("input[type='checkbox']:checked").val()=='all') {
-            checked = 'все сотрудники';
+        if ($(target).find("input[type='checkbox']:checked").val() == 'all') {
+            checked = 'все';
         }
         if (checked) {
             $(target).find('select option:first').html('Выбрано: ' + checked);
@@ -13,6 +13,7 @@
             $(target).find('select option:first').html('Выберите из списка');
         }
     }
+
     $.fn.checkselect = function () {
         this.wrapInner('<div class="checkselect-popup"></div>');
         this.prepend(
@@ -60,6 +61,8 @@ class Report {
     $reportContainer = {};
     $arrUsersSelect = [];
     objUsers = [];
+    $arrGroupsSelect = [];
+    objGroups = [];
     data = {};
     filterTitles = {
         dateFrom: 'Интервал от',
@@ -67,7 +70,7 @@ class Report {
         user: 'Сотрудник',
         sort: 'Сортировка по дате',
         after30: 'Больше 30 дней',
-
+        group: 'Рабочая группа'
     }
     paramsList = {};
     chartData = []; //данные для графика
@@ -92,6 +95,7 @@ class Report {
 
     async init() {
         await this.createUsersList();
+        await this.createGroupsList();
         let filterTitles = this.filterTitles;
 
         let setDateDiv = this.createSetDateDiv();
@@ -101,11 +105,11 @@ class Report {
             .append(`   <div class="left-side">
                                 <div class="filter">
                                     ${setDateDiv}
-                                    <div class="filter-item" style="display:none">
+                                    <div class="filter-item">
                                         <label class="label" for="dateFrom">${filterTitles.dateFrom}:</label>
                                         <input type="text" onclick="BX.calendar({node: this, field: this, bTime: false});" class="js-filter-input" name="dateFrom" id="dateFrom" >
                                     </div>
-                                    <div class="filter-item dateTo" style="display:none">
+                                    <div class="filter-item dateTo">
                                         <label class="label" for="dateTo">${filterTitles.dateTo}:</label>
                                         <input type="text" onclick="BX.calendar({node: this, field: this, bTime: false});" class="js-filter-input" name="dateTo"  id="dateTo">
                                     </div>
@@ -118,9 +122,13 @@ class Report {
                                     <div class="filter-item" data-filter="user">
                                         <label class="label" for="user">${filterTitles.user}:</label>
                                     </div>
+                                    <div class="filter-item" data-filter="group">
+                                        <label class="label" for="group">${filterTitles.group}:</label>
+                                    </div>
                                 </div>
                                 <div class="params-list"></div>
                                 <div class="totals"><table class="totals-table"><tbody></tbody></table></div>
+
                         </div>`)
             .append(`<div class="charts"><div id="chartdiv_pie"></div><div id="chartdiv"></div></div>`)
             .append(`<table class="table-tasks">
@@ -149,6 +157,7 @@ class Report {
                         </tbody>
                     </table>`);
         $('[data-filter="user"]').append(this.$arrUsersSelect);
+        $('[data-filter="group"]').append(this.$arrGroupsSelect);
         $('.checkselect').checkselect();
         $('[data-filter="after30"]').append(this.createSelect('after30'));
 
@@ -166,8 +175,8 @@ class Report {
 
     setChecked(target) {
         let checked = $(target).find("input[type='checkbox']:checked").length;
-        if ($(target).find("input[type='checkbox']:checked").val()=='all') {
-            checked = 'все сотрудники';
+        if ($(target).find("input[type='checkbox']:checked").val() == 'all') {
+            checked = 'все';
         }
         if (checked) {
             $(target).find('select option:first').html('Выбрано: ' + checked);
@@ -232,12 +241,17 @@ class Report {
         $('input[name="user[]"]:checked').each(function () {
             arrSelectedUsers.push($(this).val());
         });
+        let arrSelectedGroups = [];
+        $('input[name="group[]"]:checked').each(function () {
+            arrSelectedGroups.push($(this).val());
+        });
         let params = {
             dateFrom: $('input[name="dateFrom"]').val(),
             dateTo: $('input[name="dateTo"]').val(),
             //closed: $('select[name="closed"]').val(),
             //start_prod: $('select[name="start_prod"]').val(),
             user: arrSelectedUsers,
+            group: arrSelectedGroups,
             sort: $('.th_create').data('sort'),
             after30: $('select[name="after30"]').val(),
             //deal_success: $('select[name="deal_success"]').val(),
@@ -382,16 +396,36 @@ class Report {
                 $('input[name="user[]"]').prop('checked', false);
             }
 
-            This.setChecked('.checkselect');
+            This.setChecked('#user-filt');
 
-            
+
         });
 
         $('input[name="user[]"]').click(function () {
-            if ( $('input[name="all_users"]').is(':checked')) {
+            if ($('input[name="all_users"]').is(':checked')) {
                 $('input[name="all_users"]').prop('checked', false);
             }
-            This.setChecked('.checkselect');
+            This.setChecked('#user-filt');
+        });
+
+        $('input[name="all_Groups"]').click(function () {
+            if ($(this).is(':checked')) {
+                $('input[name="group[]"]').prop('checked', false);
+            } else {
+                $(this).prop('checked', true);
+                $('input[name="group[]"]').prop('checked', false);
+            }
+
+            This.setChecked('#group-filt');
+
+
+        });
+
+        $('input[name="group[]"]').click(function () {
+            if ($('input[name="all_Groups"]').is(':checked')) {
+                $('input[name="all_Groups"]').prop('checked', false);
+            }
+            This.setChecked('#group-filt');
         });
 
     }
@@ -412,6 +446,25 @@ class Report {
 
         this.$arrUsersSelect = $select;
         this.objUsers = objUsers;
+
+    }
+
+
+    async createGroupsList() {
+        let objGroups = await this.getGroups();
+        if (this.IsJsonString(objGroups)) objGroups = JSON.parse(objGroups);
+
+        let arrGroups = Object.values(objGroups);
+
+
+        let $select = $('<div  name="group" class="js-filter-input checkselect" id="group-filt"><label><input name="all_Groups" value="all" type="checkbox" checked>Все группы</label></div>');
+
+        for (let group of arrGroups) {
+            $select.append(`<label><input name="group[]" type="checkbox" value="${group.ID}">${group.NAME}</label>`);
+        }
+
+        this.$arrGroupsSelect = $select;
+        this.objGroups = objGroups;
 
     }
 
@@ -488,6 +541,18 @@ class Report {
         });
     }
 
+    async getGroups() {
+        return $.ajax({
+            url: "/local/components/sp_csn/table_clasest_task/ajax.php",
+            type: "POST",
+            dataType: "html",
+            data: {
+                sessid: BX.bitrix_sessid(),
+                action: 'getGroups',
+            },
+        });
+    }
+
     /**
      * Задает фильтр 
      * @param {Array} params фильтр вида {dateFrom:'01.07.2021', dateTo:'31.08.2021', closed:true , start_prod:true, user:12}
@@ -525,20 +590,39 @@ class Report {
         let usersTotal = this.data.totals.users;
         let totals = this.data.totals;
 
-        for (let user_id in usersTotal) {
+        /*         for (let user_id in usersTotal) {
+        
+                    if (!objUsers[user_id]) continue;
+                    chartdata.push({
+                        "name": `${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}`,
+                        'steps': usersTotal[user_id]['count_days'] / usersTotal[user_id]['all'],
+        
+                    });
+                }
+        
+                this.chartData = chartdata; */
 
-            if (!objUsers[user_id]) continue;
-            chartdata.push({
-                "name": `${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}`,
-                'steps': usersTotal[user_id]['count_days'] / usersTotal[user_id]['all'],
+                totals.all_overdued = (totals.all_overdued)?totals.all_overdued:0;
+                totals.all_changed_dedline = (totals.all_changed_dedline)?totals.all_changed_dedline:0;
+                totals.all = (totals.all)?totals.all:0;
 
-            });
-        }
+        chartdataPie = [
+            {
+                "name": `Просроченные`,
+                'tasks': totals.all_overdued,
+            },
+            {
+                "name": `С перенесенными сроками`,
+                'tasks': totals.all_changed_dedline,
+            },
+            {
+                "name": `Без замечаний`,
+                'tasks': (totals.all-totals.all_changed_dedline-totals.all_overdued),
+            },
+        ]
 
-        this.chartData = chartdata;
 
-
-        for (let user_id in usersTotal) {
+/*         for (let user_id in usersTotal) {
 
             if (!objUsers[user_id]) continue;
             chartdataPie.push({
@@ -546,25 +630,55 @@ class Report {
                 'tasks': usersTotal[user_id]['all'],
 
             });
-        }
+        } */
 
         this.chartDataPie = chartdataPie;
 
-        totals.meanDays = this.data.items.reduce(function (accumulator, item) {
-            return accumulator + item.COUNT_DAYS;
-        }, 0) / this.data.items.length;
+        /*  totals.meanDays = this.data.items.reduce(function (accumulator, item) {
+             return accumulator + item.COUNT_DAYS;
+         }, 0) / this.data.items.length; */
 
-        $('.totals .totals-table tbody').html(`
-                                <tr>
-                                <td>Всего задач</td><td>${(totals.all) ? totals.all : 0}</td>
-                                </tr>
-                                <tr>
-                                <td>Среднее время продолжительности задачи (дн.)</td><td>${(totals.meanDays) ? totals.meanDays.toFixed(2) : ''}</td>
-                                </tr>
-                                
-                                `);
+        /*         $('.totals .totals-table tbody').html(`
+                                        <tr>
+                                        <td>Всего задач</td><td>${(totals.all) ? totals.all : 0}</td>
+                                        </tr>
+                                        <tr>
+                                        <td>Среднее время продолжительности задачи (дн.)</td><td>${(totals.meanDays) ? totals.meanDays.toFixed(2) : ''}</td>
+                                        </tr>
+                                        
+                                        `); */
+        $('.totals').html('');                                
+        for (let user_id in usersTotal) {
 
+            if (!usersTotal[user_id]['all']) continue;
+            $('.totals').append(`
+                            <table class="totals-table">
+                                <tbody>
+                                    <tr>
+                                        <td><b>${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Всего задач</td><td>${usersTotal[user_id]['all']}</td>
+                                    </tr>             
+                                    <tr>
+                                        <td>Среднее время продолжительности задачи (дн.)</td><td>${(usersTotal[user_id]['count_days'] / usersTotal[user_id]['all']).toFixed(2)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Количество просроченных задач (шт.)</td><td>${(usersTotal[user_id]['count_overdued']) ? usersTotal[user_id]['count_overdued'] : 0}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Количество задач с перенесенным дедлайном (не просроченные)(шт.)</td><td>${(usersTotal[user_id]['count_changed_deadline']) ? usersTotal[user_id]['count_changed_deadline'] : 0}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Общее время, на которое были перенесены задачи (дн.)</td><td>${(usersTotal[user_id]['count_days_changed']) ? usersTotal[user_id]['count_days_changed'].toFixed(2) : '-'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>                                       
+                        `);
 
+        }
+
+        //console.log('data', this.data);
     }
 
     createTable() {
@@ -672,7 +786,7 @@ class Report {
 
         this.createTotals();
 
-        this.createChart();
+        // this.createChart();
 
         this.createChartPie();
     }
