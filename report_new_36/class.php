@@ -928,6 +928,8 @@ class Report extends CBitrixComponent
                     (array) $item['OPTIONS']['imap'][\Bitrix\Mail\Helper\MessageFolder::OUTCOME]
                 );
 
+                if (empty($arDIR_MD5))  $arDIR_MD5 = [md5('Sent')];
+
                 $mailboxFilter[] = [
                     '=MMU.MAILBOX_ID' => $item['ID'],
                     '@MMU.DIR_MD5'    => $arDIR_MD5,
