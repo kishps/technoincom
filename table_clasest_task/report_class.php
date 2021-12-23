@@ -42,7 +42,7 @@ class TasksClosestReport
         );
         /**Обработка  просроченных задач******/
         while ($arTask = $res->GetNext()) {
-            $arrTasksIвOVERDUED[$arTask['ID']] = 1;
+            $arrTasksIdOVERDUED[$arTask['ID']] = 1;
         }
 
 
@@ -75,7 +75,7 @@ class TasksClosestReport
 
         $tasksLog = self::getLogTasks($arrTasksID);
 
-        foreach ($arReturn['items'] as $arTask) {
+        foreach ($arReturn['items'] as $key => $arTask) {
 
 
 
@@ -84,16 +84,18 @@ class TasksClosestReport
 
             $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['count_days'] += $arTask['COUNT_DAYS'];
 
-            if ($arrTasksIвOVERDUED[$arTask['ID']]) {
+            if ($arrTasksIdOVERDUED[$arTask['ID']]) {
                 $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['count_overdued'] ++;
                 $arReturn['totals']['all_overdued']++;
                 if ($tasksLog[$arTask['ID']]) {
                     $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['count_days_changed'] += $tasksLog[$arTask['ID']];
                 }
+                $arReturn['items'][$key]['IS_OVERDUED'] = true;
             } elseif ($tasksLog[$arTask['ID']]) {
                 $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['count_changed_deadline']++;
                 $arReturn['totals']['users'][$arTask['RESPONSIBLE_ID']]['count_days_changed'] += $tasksLog[$arTask['ID']];
                 $arReturn['totals']['all_changed_dedline']++;
+                $arReturn['items'][$key]['IS_CHANGED_DEADLINE'] = true;
             }
 
 

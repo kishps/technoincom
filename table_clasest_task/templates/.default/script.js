@@ -130,7 +130,7 @@ class Report {
                                 <div class="totals"><table class="totals-table"><tbody></tbody></table></div>
 
                         </div>`)
-            .append(`<div class="charts"><div id="chartdiv_pie"></div><div id="chartdiv"></div></div>`)
+            .append(`<div class="charts"><div id="chartdiv_pie"></div></div>`)
             .append(`<table class="table-tasks">
                         <thead>
                             <tr>
@@ -428,6 +428,9 @@ class Report {
             This.setChecked('#group-filt');
         });
 
+
+
+
     }
 
 
@@ -652,7 +655,7 @@ class Report {
 
             if (!usersTotal[user_id]['all']) continue;
             $('.totals').append(`
-                            <table class="totals-table">
+                            <table class="totals-table" style="z-index:9999;">
                                 <tbody>
                                     <tr>
                                         <td><b>${objUsers[user_id].NAME} ${objUsers[user_id].LAST_NAME}</b></td>
@@ -663,10 +666,10 @@ class Report {
                                     <tr>
                                         <td>Среднее время продолжительности задачи (дн.)</td><td>${(usersTotal[user_id]['count_days'] / usersTotal[user_id]['all']).toFixed(2)}</td>
                                     </tr>
-                                    <tr>
+                                    <tr style="cursor:pointer;" data-show="over" data-total_id="${user_id}">
                                         <td>Количество просроченных задач (шт.)</td><td>${(usersTotal[user_id]['count_overdued']) ? usersTotal[user_id]['count_overdued'] : 0}</td>
                                     </tr>
-                                    <tr>
+                                    <tr style="cursor:pointer;" data-show="changed" data-total_id="${user_id}">
                                         <td>Количество задач с перенесенным дедлайном (не просроченные)(шт.)</td><td>${(usersTotal[user_id]['count_changed_deadline']) ? usersTotal[user_id]['count_changed_deadline'] : 0}</td>
                                     </tr>
                                     <tr>
@@ -677,6 +680,17 @@ class Report {
                         `);
 
         }
+
+        $('.totals-table tr').on('click', function() {
+            let user = $(this).data('total_id');
+            let show = $(this).data('show');
+
+            $('.table-tasks tr[data-task_id]').hide();
+            $(`.table-tasks tr[data-us_id="${user}"][data-${show}="true"]`).show();
+
+            console.log(`.table-tasks tr[data-us_id="${user}"][data-${show}="true"]`);
+            $(this).css('background-color','green');
+        })
 
         //console.log('data', this.data);
     }
@@ -705,11 +719,11 @@ class Report {
 
             item.UF_AUTO_691625133653 = (item.UF_AUTO_691625133653 == 'Y') ? 'Да' : item.UF_AUTO_691625133653;
             item.UF_AUTO_691625133653 = (item.UF_AUTO_691625133653 == 'N') ? 'Нет' : item.UF_AUTO_691625133653;
-
+            //console.log('item',item);
 
             let userinfoDiv = (user) ? `<div data-user="${item.RESPONSIBLE_ID}"><img src="${user.PHOTO.src}" class="personal-photo">${user.NAME}  ${user.LAST_NAME}</div>` : 'Сотрудник не из отдела продаж';
             $("#report .table-tasks tbody").append(`
-                <tr data-task_id="${item.ID}">
+                <tr data-task_id="${item.ID}" data-us_id="${item.RESPONSIBLE_ID}" data-over="${item.IS_OVERDUED}" data-changed="${item.IS_CHANGED_DEADLINE}">
                     <td>
                         <a href="/company/personal/user/63/tasks/task/view/${item.ID}/">${item.TITLE}</a>
                     </td>
